@@ -163,6 +163,6 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
       });
 
 
-    app.listen(process.env.PORT || 80, () => {
+    app.listen(process.env.PORT || 3000, () => {
       console.log("app is listening on port " + port);
     });
