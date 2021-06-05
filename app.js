@@ -82,23 +82,23 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
     api_token: process.env.API_KEY
   }
   var websiteContent;
-  var todaysQuote;
   var fiftyQuotes;
+  var todaysQuote;
 
   axios.get(" https://www.buzzsprout.com/api/1173590/episodes.json", {
       params
     })
     .then(response => {
       websiteContent = response.data;
-      postfetch01();
+      postfech01();
     }).catch(error => {
       console.log(error);
     });
 
   function postfech01() {
-    axios.get("https://zenquotes.io/api/today/")
+    axios.get("https://zenquotes.io/api/today/", )
       .then(response => {
-        todaysQuote = response.h;
+        todaysQuote = response.data[0].h;
         postfech02();
       }).catch(error => {
         console.log(error);
@@ -106,18 +106,22 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
   }
 
   function postfech02() {
-    axios.get(' https://zenquotes.io/api/quotes/', )
+    axios.get("https://zenquotes.io/api/quotes/", )
       .then(response => {
         const websiteContent = response.data;
         websiteContent.forEach((item, i) => {
+          if (typeof i == "undefined") {
+            i = 0;
+          }
           fiftyQuotes = fiftyQuotes + (i + 1).toString() + item.h + "<br />";
+          postfech03();
         })
       }).catch(error => {
         console.log(error);
       });
   }
 
-  function postfetch() {
+  function postfech03() {
     longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>Quotes to think about</h1> <h2>On todays day<h2/><br/><h3>" + todaysQuote + "</h3> <h2>Fifty quotes / ideas </h2> <br /> <p>" + fiftyQuotes + "</p> <h4>Stats</h4><h6>Total entries " + websiteContent.length + "</h6> <p>";
     // sort data based on highest value
     websiteContent.sort((a, b) => {
