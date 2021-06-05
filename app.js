@@ -61,7 +61,7 @@ app.get("/manualtrg/auth/" + process.env.AUTH_KEY, (req, res) => {
 
     var mailOptions = {
       from: "demotestoauth@gmail.com",
-      to: "ash6chin8@gmail.com",
+      to: process.env.TARGET_MAIL_ID,
       subject: "Manual Podcast Progress Update From Ashwin's Code",
       html: longStringOfInformation
     };
@@ -154,7 +154,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
 
     var mailOptions = {
       from: "demotestoauth@gmail.com",
-      to: "ash6chin8@gmail.com",
+      to: process.env.TARGET_MAIL_ID,
       subject: "Automatic Podcast Progress Update From Ashwin's Code",
       html: longStringOfInformation
     };
