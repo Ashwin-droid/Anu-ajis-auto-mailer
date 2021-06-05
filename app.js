@@ -11,6 +11,7 @@ var longStringOfInformation;
 
 //fech data
 app.get("/manualtrg/auth/" + process.env.AUTH_KEY, (req, res) => {
+  res.send("Action Started");
   const params = {
     api_token: process.env.API_KEY
   }
@@ -54,7 +55,7 @@ app.get("/manualtrg/auth/" + process.env.AUTH_KEY, (req, res) => {
       service: "gmail",
       auth: {
         user: "demotestoauth@gmail.com",
-        pass: process.env.DEMO_ACCOUNT_PASSWORD;
+        pass: process.env.DEMO_ACCOUNT_PASSWORD
       }
     });
 
@@ -76,6 +77,7 @@ app.get("/manualtrg/auth/" + process.env.AUTH_KEY, (req, res) => {
 
 
 app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
+  res.send("Action Started");
       const params = {
         api_token: process.env.API_KEY
       }
@@ -142,7 +144,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
             service: "gmail",
             auth: {
               user: "demotestoauth@gmail.com",
-              pass: process.env.DEMO_ACCOUNT_PASSWORD;
+              pass: process.env.DEMO_ACCOUNT_PASSWORD
             }
           });
 
