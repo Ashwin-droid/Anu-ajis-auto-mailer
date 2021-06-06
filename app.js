@@ -105,15 +105,18 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
       });
   }
 
+
   function postfech02() {
     axios.get("https://zenquotes.io/api/quotes/", )
       .then(response => {
         const websiteContent = response.data;
         websiteContent.forEach((item, i) => {
-          if (typeof i == "undefined") {
-            i = 0;
+          if (typeof fiftyQuotes == "undefined") {
+            fiftyQuotes = 1 + item.h + "<br />";
+          } else {
+            fiftyQuotes = fiftyQuotes + (i + 1) + item.h + "<br />";
           }
-          fiftyQuotes = fiftyQuotes + (i + 1).toString() + item.h + "<br />";
+          console.log(fiftyQuotes);
           postfech03();
         })
       }).catch(error => {
@@ -122,7 +125,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
   }
 
   function postfech03() {
-    longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>Quotes to think about</h1> <h2>On todays day<h2/><br/><h3>" + todaysQuote + "</h3> <h2>Fifty quotes / ideas </h2> <br /> <p>" + fiftyQuotes + "</p> <h4>Stats</h4><h6>Total entries " + websiteContent.length + "</h6> <p>";
+    longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>Quotes And Stats</h1> <h2>On todays day<h2/><br/><h3>" + todaysQuote + "</h3> <h2>quotes / ideas for your stories</h2> <br /> <p>" + fiftyQuotes + "</p> <br /> <h2>Stats</h2><h4>Total entries " + websiteContent.length + "</h4> <p>";
     // sort data based on highest value
     websiteContent.sort((a, b) => {
       if (a.total_plays > b.total_plays) {
@@ -139,10 +142,10 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
     const arrayLength = websiteContent.length;
     websiteContent.forEach((item, i) => {
       total_plays = total_plays + item.total_plays;
-      longStringOfInformation = longStringOfInformation + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> " + " Length (in seconds): " + item.duration + ";  No of plays (Worldwide): " + item.total_plays + ";<br/><br/>";
+      longStringOfInformation = longStringOfInformation + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> " + " Length (in seconds): " + item.duration + ";  No of plays (Worldwide): " + item.total_plays + "; Published date: " + item.published_at + ";<br/><br/>";
     });
 
-    longStringOfInformation = longStringOfInformation + "</p><h4><strong>Total plays on all podcasts " + total_plays + "</strong><h4></body></html>"
+    longStringOfInformation = longStringOfInformation + "</p><h3><strong>Total plays on all podcasts " + total_plays + "</strong><h3></body></html>"
 
     var mail = nodemailer.createTransport({
       service: "gmail",
