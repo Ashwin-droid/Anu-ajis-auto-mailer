@@ -116,8 +116,8 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
           } else {
             fiftyQuotes = fiftyQuotes + (i + 1) + item.h + "<br />";
           }
-          postfech03();
         })
+        postfech03();
       }).catch(error => {
         console.log(error);
       });
