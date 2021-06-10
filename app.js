@@ -135,7 +135,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
   }
 
   function postfech03() {
-    longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>On this day, Quote And Stats</h1> <h2>On todays day<h2/><br/><strong><h6>" + onTodaysDay + "</h6></strong> <h2>Quote</h2> <br /> <strong><h3>" + quote + "<h3></strong> <br /> <h2>Stats</h2><h4>Total entries " + websiteContent.length + "</h4> <p>";
+    longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>On this day, Quote And Stats</h1> <h2>On todays day<h2/><br/><strong><h5>" + onTodaysDay + "</h5></strong> <h2>Quote</h2> <br /> <strong><h3>" + quote + "<h3></strong> <br /> <h2>Stats</h2><h4>Total entries " + websiteContent.length + "</h4> <p>";
     // sort data based on highest value
     websiteContent.sort((a, b) => {
       if (a.total_plays > b.total_plays) {
