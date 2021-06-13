@@ -107,7 +107,13 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
       .then(response => {
         var a = 1;
         response.data.data.Events.forEach((item, i) => {
-          if (!(item.html.toUpperCase().includes("WAR") || item.html.toUpperCase().includes("MURDER") || item.html.toUpperCase().includes("BATTLE") || item.html.toUpperCase().includes("ARMY"))) {
+          if (!(item.html.toUpperCase().includes("WAR") ||
+              item.html.toUpperCase().includes("MURDER") ||
+              item.html.toUpperCase().includes("BATTLE") ||
+              item.html.toUpperCase().includes("ARMY") ||
+              item.html.toUpperCase().includes("REVOLT") ||
+              item.html.toUpperCase().includes("CAPTURE") ||
+              item.html.toUpperCase().includes("PRISON"))) {
             a = a + 1;
             if (typeof onTodaysDay == "undefined") {
               onTodaysDay = "1) in year " + item.html + "<br/><br/>";
