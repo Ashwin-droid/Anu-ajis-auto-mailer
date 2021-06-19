@@ -158,8 +158,12 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     var total_plays = 0;
     const arrayLength = websiteContent.length;
     websiteContent.forEach((item, i) => {
+      if (typeof onTodaysDay == "undefined") {
+        htmlString = "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> " + " Length (HH:MM:SS): " + new Date(item.duration * 1000).toISOString().substr(11, 8) + ";  No of plays (Worldwide): " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
+      } else {
+        htmlString = htmlString + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> " + " Length (HH:MM:SS): " + new Date(item.duration * 1000).toISOString().substr(11, 8) + ";  No of plays (Worldwide): " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
+      }
       total_plays = total_plays + item.total_plays;
-      htmlString = htmlString + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> " + " Length (HH:MM:SS): " + new Date(item.duration * 1000).toISOString().substr(11, 8) + ";  No of plays (Worldwide): " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
     });
 
     longStringOfInformation = longStringOfInformation + "</p><h3><strong>Total plays on all podcasts " + total_plays + "</strong><h3>" + htmlString +"</body></html>";
