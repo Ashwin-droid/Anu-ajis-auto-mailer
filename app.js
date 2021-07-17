@@ -16,7 +16,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
   }
   var websiteContent;
   var quote;
-  var onTodaysDay;
+  var onTodaysDay = "";
 
   //buzzsprout
   axios.get(" https://www.buzzsprout.com/api/1173590/episodes.json", {
@@ -24,42 +24,42 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     })
     .then(response => {
       websiteContent = response.data;
-      postfech01();
+      postfech02();
     }).catch(error => {
       console.log(error);
     });
 
 
   //on todays days
-  function postfech01() {
-    var today = new Date();
-    // using date offset as heroku is hosted in usa
-    var dd = String(parseInt(String(today.getDate() + parseInt(process.env.DATE_OFFSET))));
-    var mm = String(parseInt(String(today.getMonth() + 1)));
-    axios.get("https://history.muffinlabs.com/date/" + mm + "/" + dd, )
-      .then(response => {
-        var a = 1;
-        response.data.data.Events.forEach((item, i) => {
-          if (!(item.html.toUpperCase().includes("WAR") ||
-              item.html.toUpperCase().includes("MURDER") ||
-              item.html.toUpperCase().includes("BATTLE") ||
-              item.html.toUpperCase().includes("ARMY") ||
-              item.html.toUpperCase().includes("REVOLT") ||
-              item.html.toUpperCase().includes("CAPTURE") ||
-              item.html.toUpperCase().includes("PRISON"))) {
-            a = a + 1;
-            if (typeof onTodaysDay == "undefined") {
-              onTodaysDay = "1) in year " + item.html + "<br/><br/>";
-            } else {
-              onTodaysDay = onTodaysDay + a + ") in year " + item.html + "<br/><br/>";
-            }
-          }
-        });
-        postfech02();
-      }).catch(error => {
-        console.log(error);
-      });
-  }
+  // function postfech01() {
+  //   var today = new Date();
+  //   // using date offset as heroku is hosted in usa
+  //   var dd = String(parseInt(String(today.getDate() + parseInt(process.env.DATE_OFFSET))));
+  //   var mm = String(parseInt(String(today.getMonth() + 1)));
+  //   axios.get("https://history.muffinlabs.com/date/" + mm + "/" + dd, )
+  //     .then(response => {
+  //       var a = 1;
+  //       response.data.data.Events.forEach((item, i) => {
+  //         if (!(item.html.toUpperCase().includes("WAR") ||
+  //             item.html.toUpperCase().includes("MURDER") ||
+  //             item.html.toUpperCase().includes("BATTLE") ||
+  //             item.html.toUpperCase().includes("ARMY") ||
+  //             item.html.toUpperCase().includes("REVOLT") ||
+  //             item.html.toUpperCase().includes("CAPTURE") ||
+  //             item.html.toUpperCase().includes("PRISON"))) {
+  //           a = a + 1;
+  //           if (typeof onTodaysDay == "undefined") {
+  //             onTodaysDay = "1) in year " + item.html + "<br/><br/>";
+  //           } else {
+  //             onTodaysDay = onTodaysDay + a + ") in year " + item.html + "<br/><br/>";
+  //           }
+  //         }
+  //       });
+  //       postfech02();
+  //     }).catch(error => {
+  //       console.log(error);
+  //     });
+  // }
 
 
   function postfech02() {
@@ -74,7 +74,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
   }
 
   function postfech03() {
-    longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>On this day, Quote And Stats</h1> <h2>On todays day<h2/><br/><strong><h5>" + onTodaysDay + "</h5></strong> <h2>Quote</h2> <br /> <strong><h3>" + quote + "<h3></strong> <br /> <h2>Stats</h2><h4>Total entries " + websiteContent.length + "</h4> <p>";
+    longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>Quote And Stats</h1><h2>Quote</h2> <br /> <strong><h3>" + quote + "<h3></strong> <br /> <h2>Stats</h2><h4>Total entries " + websiteContent.length + "</h4> <p>";
     // sort data based on highest value
     websiteContent.sort((a, b) => {
       if (a.total_plays > b.total_plays) {
