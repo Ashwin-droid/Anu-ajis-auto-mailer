@@ -92,9 +92,9 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     const arrayLength = websiteContent.length;
     websiteContent.forEach((item, i) => {
       if (typeof htmlString == "undefined") {
-        htmlString = "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> " + " Length (HH:MM:SS): " + new Date(item.duration * 1000).toISOString().substr(11, 8) + ";  No of plays (Worldwide): " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
+        htmlString = "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> " + " ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
       } else {
-        htmlString = htmlString + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> " + " Length (HH:MM:SS): " + new Date(item.duration * 1000).toISOString().substr(11, 8) + ";  No of plays (Worldwide): " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
+        htmlString = htmlString + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a>" + " ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
       }
       total_plays = total_plays + item.total_plays;
     });
@@ -112,7 +112,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     var mailOptions = {
       from: "demotestoauth@gmail.com",
       to: process.env.TARGET_MAIL_ID,
-      subject: "Automatic Podcast Progress Update, On This Day And A Quote From Ashwin's Code",
+      subject: "Automatic Podcast Progress Update And A Quote From Ashwin's Code",
       html: longStringOfInformation
     };
 
