@@ -92,9 +92,9 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     const arrayLength = websiteContent.length;
     websiteContent.forEach((item, i) => {
       if (typeof htmlString == "undefined") {
-        htmlString = "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> " + " ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
+        htmlString = "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
       } else {
-        htmlString = htmlString + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a>" + " ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
+        htmlString = htmlString + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
       }
       total_plays = total_plays + item.total_plays;
     });
