@@ -74,7 +74,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
   }
 
   function postfech03() {
-    longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>Quote And Stats</h1><h2>Quote</h2> <br /> <strong><h3>" + quote + "<h3></strong> <br /> <h2>Stats</h2><h4>Total entries " + websiteContent.length + "</h4> <p>";
+    longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>Good Morning</h1><h2>Quote</h2> <br /> <strong><h3>" + quote + "<h3></strong> <br /> <h2>Stats</h2><h4>Total entries " + websiteContent.length + "</h4> <p>";
     // sort data based on highest value
     websiteContent.sort((a, b) => {
       if (a.total_plays > b.total_plays) {
@@ -85,16 +85,31 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
       }
       return 0;
     });
-
+    const highestValue = websiteContent[0].total_plays;
+    const lowestValue = websiteContent[(websiteContent.length - 1)].total_plays;
+    const fiveEqualDivisions = (highestValue - lowestValue)/5;
+    const first = fiveEqualDivisions, second = fiveEqualDivisions * 2, third = fiveEqualDivisions * 3, forth = fiveEqualDivisions * 4, fifth = fiveEqualDivisions * 5;
     //filter data
     var htmlString;
     var total_plays = 0;
     const arrayLength = websiteContent.length;
+    var perf;
     websiteContent.forEach((item, i) => {
-      if (typeof htmlString == "undefined") {
-        htmlString = "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
+      if (item.total_plays <= first) {
+        perf = "&#128546;&#128557; (Lowest downloads)";
+      } else if (item.total_plays <= second) {
+        perf = "&#128532;&#128553; (Not doing well)";
+      } else if (item.total_plays <= third) {
+        perf = "&#128580;&#128530; (Ok)";
+      } else if (item.total_plays <= forth) {
+        perf = "&#9786;&#128077; (Very Good)";
       } else {
-        htmlString = htmlString + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + ";<br/><br/>";
+        perf = "&#128526;&#129315; (Extraordinary)";
+      }
+      if (typeof htmlString == "undefined") {
+        htmlString = "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + "; Performance: " + perf + "<br/><br/>";
+      } else {
+        htmlString = htmlString + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + "; Performance: " + perf + "<br/><br/>";
       }
       total_plays = total_plays + item.total_plays;
     });
