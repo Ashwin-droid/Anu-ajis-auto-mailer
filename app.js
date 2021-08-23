@@ -16,7 +16,6 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
   }
   var websiteContent;
   var quote;
-  var onTodaysDay = "";
 
   //buzzsprout
   axios.get(" https://www.buzzsprout.com/api/1173590/episodes.json", {
@@ -85,7 +84,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
       }
       return 0;
     });
-    const highestValue = websiteContent[0].total_plays;
+    const highestValue = websiteContent[1].total_plays;
     const lowestValue = websiteContent[(websiteContent.length - 1)].total_plays;
     const fiveEqualDivisions = (highestValue - lowestValue)/5;
     const first = fiveEqualDivisions, second = fiveEqualDivisions * 2, third = fiveEqualDivisions * 3, forth = fiveEqualDivisions * 4, fifth = fiveEqualDivisions * 5;
@@ -95,19 +94,19 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     const arrayLength = websiteContent.length;
     var perf;
     websiteContent.forEach((item, i) => {
-      if (item.total_plays <= first) {
+      if (item.total_plays <= (first - 20)) {
         perf = "&#128546;&#128557; (Lowest downloads)";
-      } else if (item.total_plays <= second) {
+      } else if (item.total_plays <= (second - 20)) {
         perf = "&#128532;&#128553; (Not doing well)";
-      } else if (item.total_plays <= third) {
+      } else if (item.total_plays <= (third - 20)) {
         perf = "&#128580;&#128530; (Ok)";
-      } else if (item.total_plays <= forth) {
+      } else if (item.total_plays <= (forth - 20)) {
         perf = "&#9786;&#128077; (Very Good)";
       } else {
         perf = "&#128526;&#129315; (Extraordinary)";
       }
       if (typeof htmlString == "undefined") {
-        htmlString = "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + "; Performance: " + perf + "<br/><br/>";
+        htmlString = "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + "; Performance: " + "&#128526;&#9786;&#129315;&#128077; (Has no defination)" + "<br/><br/>";
       } else {
         htmlString = htmlString + "Title: " + item.title + " ;  <a href=" + item.audio_url.toString() + "> Location</a> ;  Downloads: " + item.total_plays + "; Published date: " + item.published_at.split("T")[0] + "; Performance: " + perf + "<br/><br/>";
       }
