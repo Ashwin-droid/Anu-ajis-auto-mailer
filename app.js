@@ -29,38 +29,6 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     });
 
 
-  //on todays days
-  // function postfech01() {
-  //   var today = new Date();
-  //   // using date offset as heroku is hosted in usa
-  //   var dd = String(parseInt(String(today.getDate() + parseInt(process.env.DATE_OFFSET))));
-  //   var mm = String(parseInt(String(today.getMonth() + 1)));
-  //   axios.get("https://history.muffinlabs.com/date/" + mm + "/" + dd, )
-  //     .then(response => {
-  //       var a = 1;
-  //       response.data.data.Events.forEach((item, i) => {
-  //         if (!(item.html.toUpperCase().includes("WAR") ||
-  //             item.html.toUpperCase().includes("MURDER") ||
-  //             item.html.toUpperCase().includes("BATTLE") ||
-  //             item.html.toUpperCase().includes("ARMY") ||
-  //             item.html.toUpperCase().includes("REVOLT") ||
-  //             item.html.toUpperCase().includes("CAPTURE") ||
-  //             item.html.toUpperCase().includes("PRISON"))) {
-  //           a = a + 1;
-  //           if (typeof onTodaysDay == "undefined") {
-  //             onTodaysDay = "1) in year " + item.html + "<br/><br/>";
-  //           } else {
-  //             onTodaysDay = onTodaysDay + a + ") in year " + item.html + "<br/><br/>";
-  //           }
-  //         }
-  //       });
-  //       postfech02();
-  //     }).catch(error => {
-  //       console.log(error);
-  //     });
-  // }
-
-
   function postfech02() {
     axios.get("https://zenquotes.io/api/random", )
       .then(response => {
@@ -86,21 +54,21 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     });
     const highestValue = websiteContent[1].total_plays;
     const lowestValue = websiteContent[(websiteContent.length - 1)].total_plays;
-    const fiveEqualDivisions = (highestValue - lowestValue)/5;
-    const first = fiveEqualDivisions, second = fiveEqualDivisions * 2, third = fiveEqualDivisions * 3, forth = fiveEqualDivisions * 4, fifth = fiveEqualDivisions * 5;
+    const fiveUnEqualDivisions = ((highestValue - lowestValue)/5);
+    const first = (fiveUnEqualDivisions - 50), second = (fiveUnEqualDivisions * 2 - 50), third = (fiveUnEqualDivisions * 3 - 50), forth = (fiveUnEqualDivisions * 4 - 50);
     //filter data
     var htmlString;
     var total_plays = 0;
     const arrayLength = websiteContent.length;
     var perf;
     websiteContent.forEach((item, i) => {
-      if (item.total_plays <= (first - 20)) {
+      if (item.total_plays <= first) {
         perf = "&#128546;&#128557; (Lowest downloads)";
-      } else if (item.total_plays <= (second - 20)) {
+      } else if (item.total_plays <= second) {
         perf = "&#128532;&#128553; (Not doing well)";
-      } else if (item.total_plays <= (third - 20)) {
+      } else if (item.total_plays <= third) {
         perf = "&#128580;&#128530; (Ok)";
-      } else if (item.total_plays <= (forth - 20)) {
+      } else if (item.total_plays <= forth) {
         perf = "&#9786;&#128077; (Very Good)";
       } else {
         perf = "&#128526;&#129315; (Extraordinary)";
