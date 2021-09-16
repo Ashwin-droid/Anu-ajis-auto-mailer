@@ -3,6 +3,7 @@ const env = require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
 const nodemailer = require("nodemailer");
+const rh = require("./right-hand.js");
 const app = express();
 
 //body
@@ -11,36 +12,18 @@ var longStringOfInformation;
 
 app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
   res.send("Action Started");
-  const params = {
-    api_token: process.env.API_KEY
-  }
   var websiteContent;
   var quote;
 
-  //buzzsprout
-  axios.get(" https://www.buzzsprout.com/api/1173590/episodes.json", {
-      params
-    })
-    .then(response => {
-      websiteContent = response.data;
-      postfech02();
-    }).catch(error => {
-      console.log(error);
+  rh.buzzsprout.read((bd) => {
+    websiteContent = bd;
+    rh.QuoteRequest((qt) => {
+      quote = qt;
+      postfech()
     });
+  }, process.env.API_KEY);
 
-
-  function postfech02() {
-    axios.get("https://zenquotes.io/api/random", )
-      .then(response => {
-        quote = response.data[0].h;
-        postfech03();
-
-      }).catch(error => {
-        console.log(error);
-      });
-  }
-
-  function postfech03() {
+  function postfech() {
     longStringOfInformation = "<!DOCTYPE html><html><head></head><body> <h1>Good Morning</h1><h2>Quote</h2> <br /> <strong><h3>" + quote + "<h3></strong> <br /> <h2>Stats</h2><h4>Total entries " + websiteContent.length + "</h4> <p>";
     // sort data based on highest value
     websiteContent.sort((a, b) => {
@@ -85,33 +68,10 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     });
 
     longStringOfInformation = longStringOfInformation + "</p><h3><strong>Total plays on all podcasts " + total_plays + "</strong><h3>" + htmlString + "</body></html>";
-    email(longStringOfInformation);
+    rh.email(nodemailer, longStringOfInformation);
   }
 });
 
-
-function email(html) {
-  var mail = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "demotestoauth@gmail.com",
-      pass: process.env.DEMO_ACCOUNT_PASSWORD
-    }
-  });
-
-  var mailOptions = {
-    from: "demotestoauth@gmail.com",
-    to: process.env.TARGET_MAIL_ID,
-    subject: "Automatic Podcast Progress Update And A Quote From Ashwin's Code",
-    html: html
-  };
-
-  mail.sendMail(mailOptions, function(error, info) {
-    if (error) {
-      console.log(error);
-    }
-  });
-}
 
 var port = process.env.PORT || 3000;
 
