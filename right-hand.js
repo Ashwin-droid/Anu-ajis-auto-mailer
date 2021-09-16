@@ -1,12 +1,13 @@
 const env = require("dotenv").config();
 const axios = require("axios");
+const nodemailer = require("nodemailer");
 const moduleInstanceOfAxios = axios.create({
   baseURL: "https://www.buzzsprout.com/api"
 });
 const request = axios.create({});
 
 module.exports = {
-  email: function(nodemailer, html) {
+  email: function(html) {
     var mail = nodemailer.createTransport({
       service: "gmail",
       auth: {

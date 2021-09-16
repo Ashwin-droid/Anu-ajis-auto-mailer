@@ -1,8 +1,6 @@
 //imports
 const env = require("dotenv").config();
 const express = require("express");
-const axios = require("axios");
-const nodemailer = require("nodemailer");
 const rh = require("./right-hand.js");
 const app = express();
 
@@ -10,7 +8,7 @@ const app = express();
 
 var longStringOfInformation;
 
-app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
+app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
   res.send("Action Started");
   var websiteContent;
   var quote;
@@ -68,7 +66,7 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY2, (req, res) => {
     });
 
     longStringOfInformation = longStringOfInformation + "</p><h3><strong>Total plays on all podcasts " + total_plays + "</strong><h3>" + htmlString + "</body></html>";
-    rh.email(nodemailer, longStringOfInformation);
+    rh.email(longStringOfInformation);
   }
 });
 
