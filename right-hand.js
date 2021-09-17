@@ -7,7 +7,7 @@ const moduleInstanceOfAxios = axios.create({
 const request = axios.create({});
 
 module.exports = {
-  email: function(html) {
+  email: (html) => {
     var mail = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -23,14 +23,14 @@ module.exports = {
       html: html
     };
 
-    mail.sendMail(mailOptions, function(error, info) {
+    mail.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log(error);
       }
     });
   },
   buzzsprout: {
-    read: function(after, apikey) {
+    read: (after, apikey) => {
       moduleInstanceOfAxios.get("/1173590/episodes.json", {
           headers: {
             "Authorization": "Token token=" + apikey,
@@ -43,7 +43,7 @@ module.exports = {
           console.log(error);
         });
     },
-    write: function(id, object, apikey) {
+    write: (id, object, apikey) => {
       moduleInstanceOfAxios.put("/1173590/episodes/" + id.toString() + ".json", {
         object
       }, {
@@ -54,12 +54,21 @@ module.exports = {
       });
     }
   },
-  QuoteRequest: function(after) {
+  QuoteRequest: (after) => {
     request.get("https://zenquotes.io/api/random", )
       .then(response => {
         after(response.data[0].h);
       }).catch(error => {
         console.log(error);
       });
+  },
+  GetArrayindexs: (array, key, value, after) => {
+    var indexes = [];
+    array.forEach((item, i) => {
+      if (item[key] == value) {
+        indexes.push(i);
+      }
+    });
+    after(array, indexes)
   }
 }
