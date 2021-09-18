@@ -62,16 +62,20 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
             "extraordinaryBit": true,
             "downloads": item.total_plays
           });
-        } else if (typeof authors.find(({author}) => author == author1) == 'undefined') {
+        } else if (typeof authors.find(({
+            author
+          }) => author == author1) == 'undefined') {
           authors.push({
             "author": author1,
             "extraordinaryBit": false,
-            "downloads": item.total_plays
+            "downloads": item.total_plays,
+            "entries": 1
           });
         } else {
           rh.GetArrayindexs(authors, "author", author1, (array, indexes) => {
             indexes.forEach((Index) => {
               array[Index].downloads = authors[Index].downloads + item.total_plays;
+              array[Index].entries = authors[Index].entries + 1;
             });
           });
         }
@@ -94,16 +98,49 @@ app.get("/autotrg/ifttt/auth/" + process.env.AUTH_KEY, (req, res) => {
       }
       total_plays = total_plays + item.total_plays;
     });
-    var preString = "<table><tr><td><h3>Author</h3></td><td><h3>Views</h3></td></tr>";
+    authors.sort((a, b) => {
+      if (a.downloads > b.downloads) {
+        return -1;
+      }
+      if (a.downloads < b.downloads) {
+        return 1;
+      }
+      return 0;
+    });
+    var preString = "<table><tr><td><h3>Author</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td></tr>";
     authors.forEach((item, i) => {
-      preString = preString + "<tr><td>" + item.author + "</td><td>" + item.downloads.toString() + "</td></tr>";
+      preString = preString + "<tr><td style='padding:10px'>" + item.author + "</td><td>" + item.downloads.toString() + "</td><td style='padding:10px'>" + item.entries + "</td></tr>";
     });
     preString = preString + "<table>";
-    longStringOfInformation = longStringOfInformation + preString + "</p><h3><strong>Total plays on all podcasts " + total_plays + "</strong><h3>" + htmlString + '<p><a href="https://anu-aji-automailer.herokuapp.com/autotrg/ifttt/auth/8vxKBsXF8uno5vh42HV86DAJnC8a8DpMzpcLCkzwjo9nnKqyR8k6A3b7qoDite4z8t2czGNT5iYmkuE6adN7FVmfUk4WEXPPpNksUHqg7zRFPWUaKNi2FzQFMm6Cubi4qSkfb5nTCpED7Fg4T56sT2Qh92McQgbq7La9dMCUKyyn2kS8RGN8ZdheDRpZ9aa5ajTihPboKo9Q3H39i5yFcX8v2XrFd8DbjrViVS8mnukyNyQD86xQZf6wG9r9je3G"><strong>RE-Request this email</strong><a/></p></body></html>';
+    longStringOfInformation = longStringOfInformation + preString + "</p><h3><strong>Total plays on all podcasts " + total_plays + "</strong><h3>" + htmlString + '<a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a></body></html>';
     rh.email(longStringOfInformation);
   }
 });
+app.use(express.urlencoded( {extended: true} ));
+app.get("/tools/validity", (req, res) => {
+  res.send('<!DOCTYPE html><html lang="en" dir="ltr"> <head> <meta charset="utf-8"> <style>.btn{background: #0099ff; background-image: -webkit-linear-gradient(top, #0099ff, #00ff26); background-image: -moz-linear-gradient(top, #0099ff, #00ff26); background-image: -ms-linear-gradient(top, #0099ff, #00ff26); background-image: -o-linear-gradient(top, #0099ff, #00ff26); background-image: linear-gradient(to bottom, #0099ff, #00ff26); -webkit-border-radius: 11; -moz-border-radius: 11; border-radius: 11px; text-shadow: 1px 1px 3px #666666; font-family: Arial; color: #ffffff; font-size: 20px; padding: 10px 20px 10px 20px; text-decoration: none;}.btn:hover{background: #60acdb; background-image: -webkit-linear-gradient(top, #60acdb, #88d971); background-image: -moz-linear-gradient(top, #60acdb, #88d971); background-image: -ms-linear-gradient(top, #60acdb, #88d971); background-image: -o-linear-gradient(top, #60acdb, #88d971); background-image: linear-gradient(to bottom, #60acdb, #88d971); text-decoration: none;}.center_div{margin: 0 auto; width:0% /* value of your choice which suits your alignment */}.margin-10{margin: 10px;}</style> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous"> </head> <body> <form action="/tools/validity" method="post"> <div class="position-absolute top-50 start-50 translate-middle"> <div class="encoder"> <div class="input-group flex-nowrap margin-10"> <span class="input-group-text" id="addon-wrapping01">Password</span> <input name="password" type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> <button type="submit" class="btn" id="submit">Submit</button> </div></div></div></form> </body></html>');
+});
 
+app.post("/tools/validity", (req, res) => {
+  var password = req.body.password;
+  if (password == process.env.PASSWORD){
+    res.redirect('/administration/tools/?key=' + process.env.AUTH_KEY2);
+  }
+});
+
+app.get("/administration/tools/", (req, res) => {
+  res.send("Sending you administration tools");
+  const key = req.query.key;
+  if (key == process.env.AUTH_KEY2) {
+    longStringOfInformation = '<!DOCTYPE html><html><body> <h1>Good Morning</h1><br/><h2>Here are all your administration tools</h2><br/><h3>This is a security feature made by me!</h3>';
+    var administrationTools = ['<a href="https://anu-aji-automailer.herokuapp.com/autotrg/ifttt/auth/' + process.env.AUTH_KEY + '"><strong>RE-Request daily mail</strong><a/>'];
+    administrationTools.forEach((item) => {
+      longStringOfInformation = longStringOfInformation + "<h5>" + item + "</h5>";
+    });
+    longStringOfInformation = longStringOfInformation + "<p>This is because you forward this mail and this link can only be triggered by your mail id.<br/>Even in rare cases it will only mail admin tools to you.</p>";
+    rh.email(longStringOfInformation);
+  }
+});
 
 var port = process.env.PORT || 3000;
 
