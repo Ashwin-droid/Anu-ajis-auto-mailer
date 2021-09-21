@@ -15,7 +15,7 @@
             "webRoot": "${workspaceFolder}"
         },
         {
-            "command": "npm test",
+            "command": "nodemon app.js",
             "name": "Run npm start",
             "request": "launch",
             "type": "node-terminal"
