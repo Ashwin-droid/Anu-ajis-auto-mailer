@@ -3,7 +3,7 @@ const axios = require("axios");
 const nodemailer = require("nodemailer");
 const TextCleaner = require("text-cleaner");
 const moduleInstanceOfAxios = axios.create({
-  baseURL: "https://www.buzzsprout.com/api",
+  baseURL: "https://www.buzzsprout.com/api"
 });
 const request = axios.create({});
 
@@ -13,8 +13,8 @@ module.exports = {
       service: "gmail",
       auth: {
         user: "demotestoauth@gmail.com",
-        pass: process.env.DEMO_ACCOUNT_PASSWORD,
-      },
+        pass: process.env.DEMO_ACCOUNT_PASSWORD
+      }
     });
 
     var mailOptions = {
@@ -22,7 +22,7 @@ module.exports = {
       to: process.env.TARGET_MAIL_ID,
       subject:
         "Automatic Podcast Progress Update And A Quote From Ashwin's Code",
-      html: html,
+      html: html
     };
 
     mail.sendMail(mailOptions, (error, info) => {
@@ -37,8 +37,8 @@ module.exports = {
         .get("/1173590/episodes.json", {
           headers: {
             Authorization: "Token token=" + apikey,
-            "Content-Type": "application/json",
-          },
+            "Content-Type": "application/json"
+          }
         })
         .then((response) => {
           after(response.data);
@@ -50,17 +50,15 @@ module.exports = {
     write: (id, object, apikey) => {
       moduleInstanceOfAxios.put(
         "/1173590/episodes/" + id.toString() + ".json",
-        {
-          object,
-        },
+        object,
         {
           headers: {
             Authorization: "Token token=" + apikey,
-            "Content-Type": "application/json",
-          },
+            "Content-Type": "application/json"
+          }
         }
       );
-    },
+    }
   },
   QuoteRequest: (after) => {
     request
@@ -89,7 +87,7 @@ module.exports = {
       if (typeof item.title.split("(")[1] == "undefined") {
         extraordinarytitles.push({
           title: item.title,
-          downloads: item.total_plays,
+          downloads: item.total_plays
         });
         extraordinaryBit = true;
       } else {
@@ -100,7 +98,7 @@ module.exports = {
         if (author1 == "") {
           extraordinarytitles.push({
             title: item.title,
-            downloads: item.total_plays,
+            downloads: item.total_plays
           });
           extraordinaryBit = true;
         } else if (
@@ -109,7 +107,7 @@ module.exports = {
           authors.push({
             author: author1,
             downloads: item.total_plays,
-            entries: 1,
+            entries: 1
           });
         } else {
           function bodge(array, key, value, after) {
@@ -132,5 +130,5 @@ module.exports = {
       }
     });
     after(authors, extraordinarytitles, extraordinaryBit);
-  },
+  }
 };

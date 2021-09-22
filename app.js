@@ -282,10 +282,24 @@ app.get("/find/and/replace", (req, res) => {
 });
 
 app.post("/find/and/replace/confirm", (req, res) => {
-  res.send(req.body);
-  // if (req.cookies.auth == process.env.AUTH_KEY3) {
-  //   res.redirect("/find/and/replace?key=" + process.env.AUTH_KEY2);
-  // }
+  if (req.cookies.auth == process.env.AUTH_KEY3) {
+    res.send(`<script>setTimeout(() => {window.location.href = "/find/and/replace?key=${process.env.AUTH_KEY2}";}, 20000)</script><h1>Please wait.......Redirecting</h1>`);
+    var find = req.body.find;
+    var replace = req.body.replace;
+    var id;
+    var title;
+    var modtitle;
+    rh.buzzsprout.read((data) => {
+      data.forEach((item, i) => {
+        if (item.title.search(find) !== -1) {
+          id = item.id;
+          title = item.title;
+          modtitle = `${item.title.split("(")[0]} ( ${replace} )`;
+          rh.buzzsprout.write(id, {"title" : modtitle}, process.env.API_KEY);
+        }
+      });
+    }, process.env.API_KEY);
+  }
 });
 
 app.get("/find/and/replace/handler", (req, res) =>{
@@ -308,7 +322,7 @@ app.post("/tools/validity/", (req, res) => {
   var password = req.body.password;
   if (password == process.env.PASSWORD) {
     res.cookie("auth", process.env.AUTH_KEY3, {
-      maxAge: 500000,
+      maxAge: 5000000,
       secure: true,
       httpOnly: true,
       sameSite: "Strict"
@@ -356,7 +370,6 @@ app.post("/admin/handler/", (req, res) => {
   const auth = req.query.auth;
   if (req.cookies.auth == process.env.AUTH_KEY3) {
     if (auth == process.env.AUTH_KEY2) {
-      res.clearCookie();
       const target = req.query.param;
       if (target == "dmail") {
         res.redirect("/autotrg/ifttt/auth/" + process.env.AUTH_KEY);
