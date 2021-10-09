@@ -4,7 +4,9 @@
   "description": "Anu Aji Automailer",
   "main": "app.js",
   "scripts": {
-    "test": "node app.js"
+    "start": "node app.js",
+    "deploy": "deploy.bat",
+    "amend": "deploy.bat -f --amend"
   },
   "repository": {
     "type": "git",
