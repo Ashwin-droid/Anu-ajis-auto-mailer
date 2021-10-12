@@ -10,11 +10,13 @@ const request = axios.create({});
 module.exports = {
   email: (html) => {
     var mail = nodemailer.createTransport({
-      service: `gmail`,
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
-        user: `demotestoauth@gmail.com`,
-        pass: process.env.DEMO_ACCOUNT_PASSWORD
-      }
+        user: "demotestoauth@gmail.com",
+        pass: process.env.DEMO_ACCOUNT_PASSWORD,
+      },
     });
 
     var mailOptions = {
