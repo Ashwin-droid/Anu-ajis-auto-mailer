@@ -235,7 +235,7 @@ app.get(`/find/and/replace`, (req, res) => {
       });
     }, process.env.API_KEY);
   } else {
-    res.send(`<h1>Incorrect Key</h1>`);
+    res.redirect(`/`);
   }
 });
 
@@ -253,7 +253,10 @@ app.post(`/find/and/replace/confirm`, (req, res) => {
         if (item.title.search(find) !== -1) {
           id = item.id;
           modtitle = `${item.title.split("(")[0]} ( ${replace} )`;
-          rh.buzzsprout.write(id, { title: modtitle }, process.env.API_KEY);
+          rh.buzzsprout.write(id, { 
+            title: modtitle,
+            artist: `${replace}`
+           }, process.env.API_KEY);
         }
       });
     }, process.env.API_KEY);
@@ -293,7 +296,7 @@ app.get(`/find/and/replace/handler`, (req, res) => {
       `<!DOCTYPE html><html> <head> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <meta charset="utf-8"/> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous"/> </head> <body style="background-color: red;"><div style="margin: 10px;" class="position-absolute top-50 start-50 translate-middle"><h1 class="display-1" style="color: white;">WARNING</h1><h1 class="display-5" style="color: white;">This will permanantly overwrite ${authorName1} <br/> with ${authorName2}; This is the last warning</h1><br/><p style="color: white;">The only to go back is to rename all authors manually.<br/>You have been warned.</p><form action="/find/and/replace/confirm" method="post"><div class="d-grid gap-2" style="background-color: white; padding: 10px;"><input type='hidden' name='find' value='${authorName1}' /><input type='hidden' name='replace' value='${authorName2}' /><input type='hidden' name='key' value='${process.env.AUTH_KEY2}' /><button type="submit" class="btn btn-outline-danger btn-lg" >I Confirm, Proceed</button><button type="submit" class="btn btn-outline-warning btn-lg" formaction="/find/and/replace/diff" >View changes</button><button type="submit" class="btn btn-outline-success btn-lg" formaction="/administration/tools/" formmethod="get" >Back to safety</button></div></form></div>`
     );
   } else {
-    res.send(`<h1>Incorrect cookies</h1>`);
+    res.redirect(`/`);
   }
 });
 
@@ -314,7 +317,7 @@ app.post(`/tools/validity/`, (req, res) => {
     });
     res.redirect(`/administration/tools/?key=${process.env.AUTH_KEY2}`);
   } else {
-    res.send(`<h1>Incorrect Password</h1>`);
+    res.redirect(`/`);
   }
 });
 
@@ -341,7 +344,7 @@ app.get(`/administration/tools/`, (req, res) => {
     });
     res.send(longStringOfInformation);
   } else {
-    res.send(`<h1>Incorrect key value</h1>`);
+    res.redirect(`/`);
   }
 });
 
@@ -357,13 +360,13 @@ app.post(`/admin/handler/`, (req, res) => {
       } else if (target == `far`) {
         res.redirect(`/find/and/replace?key=${process.env.AUTH_KEY2}`);
       } else {
-        res.send(`<h1>Failure</h1>`);
+        res.redirect(`/`);
       }
     } else {
-      res.send(`<h1>Incorrect Key</h1>`);
+      res.redirect(`/`);
     }
   } else {
-    res.send(`<h1>Incorrect Cookie</h1>`);
+    res.redirect(`/`);
   }
 });
 
