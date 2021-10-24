@@ -1,6 +1,8 @@
 const env = require(`dotenv`).config();
 const axios = require(`axios`);
 const nodemailer = require(`nodemailer`);
+const { google } = require("googleapis");
+const OAuth2 = google.auth.OAuth2;
 const TextCleaner = require(`text-cleaner`);
 const moduleInstanceOfAxios = axios.create({
   baseURL: `https://www.buzzsprout.com/api`
@@ -9,29 +11,53 @@ const request = axios.create({});
 
 module.exports = {
   email: (html) => {
-    var mail = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: "demotestoauth@gmail.com",
-        pass: process.env.DEMO_ACCOUNT_PASSWORD,
-      },
-    });
-
-    var mailOptions = {
-      from: `demotestoauth@gmail.com`,
-      to: process.env.TARGET_MAIL_ID,
-      subject:
-        `Automatic Podcast Progress Update And A Quote From Ashwin's Code`,
-      html: html
+    const createTransporter = async () => {
+      const oauth2Client = new OAuth2(
+        process.env.CLIENT_ID,
+        process.env.CLIENT_SECRET,
+        "https://developers.google.com/oauthplayground"
+      );
+    
+      oauth2Client.setCredentials({
+        refresh_token: process.env.REFRESH_TOKEN
+      });
+    
+      const accessToken = await new Promise((resolve, reject) => {
+        oauth2Client.getAccessToken((err, token) => {
+          if (err) {
+            reject("Failed to create access token :(");
+          }
+          resolve(token);
+        });
+      });
+    
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          type: "OAuth2",
+          user: process.env.EMAIL,
+          accessToken,
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          refreshToken: process.env.REFRESH_TOKEN
+        }
+      });
+    
+      return transporter;
     };
-
-    mail.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-      }
+    
+    const sendEmail = async (emailOptions) => {
+      let emailTransporter = await createTransporter();
+      await emailTransporter.sendMail(emailOptions);
+    };
+    
+    sendEmail({
+      from: process.env.EMAIL,
+      to: process.env.TARGET_MAIL_ID,
+      subject: `Automatic Podcast Progress Update And A Quote From Ashwin's Code`,
+      html: html
     });
+    
   },
   buzzsprout: {
     read: (after, apikey) => {
