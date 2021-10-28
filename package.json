@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Anu Aji Automailer",
   "main": "app.js",
+  "engines": {
+    "npm": "8.1.1",
+    "node": "16.8.0"
+  },
   "scripts": {
     "start": "node app.js",
     "deploy": "deploy.bat",

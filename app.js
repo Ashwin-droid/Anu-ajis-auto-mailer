@@ -11,7 +11,6 @@ app.use(cookieParser());
 
 var port = process.env.PORT || 3000;
 var longStringOfInformation;
-var temp;
 app.use(express.urlencoded({ extended: true }));
 
 app.get(`/`, (_req, res) => {
@@ -120,7 +119,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       }</td></tr>`;
     });
     preString = preString + `<table>`;
-    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all podcasts ${total_plays} </strong><h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a></body></html>`;
+    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all podcasts ${total_plays} </strong><h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 });
@@ -371,5 +370,5 @@ app.post(`/admin/handler/`, (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`app is listening on port ${port}`);
+  console.log(`Hit me on http://localhost:${port}/`);
 });
