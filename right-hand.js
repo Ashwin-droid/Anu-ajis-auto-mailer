@@ -17,11 +17,11 @@ module.exports = {
         process.env.CLIENT_SECRET,
         "https://developers.google.com/oauthplayground"
       );
-    
+
       oauth2Client.setCredentials({
         refresh_token: process.env.REFRESH_TOKEN
       });
-    
+
       const accessToken = await new Promise((resolve, reject) => {
         oauth2Client.getAccessToken((err, token) => {
           if (err) {
@@ -30,7 +30,7 @@ module.exports = {
           resolve(token);
         });
       });
-    
+
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -42,29 +42,28 @@ module.exports = {
           refreshToken: process.env.REFRESH_TOKEN
         }
       });
-    
+
       return transporter;
     };
-    
+
     const sendEmail = async (emailOptions) => {
       let emailTransporter = await createTransporter();
       await emailTransporter.sendMail(emailOptions);
     };
-    
+
     sendEmail({
       from: process.env.EMAIL,
       to: process.env.TARGET_MAIL_ID,
       subject: `Automatic Podcast Progress Update And A Quote From Ashwin's Code`,
       html: html
     });
-    
   },
   buzzsprout: {
     read: (after, apikey) => {
       moduleInstanceOfAxios
         .get(`/1173590/episodes.json`, {
           headers: {
-            "Authorization": `Token token=${apikey}`,
+            Authorization: `Token token=${apikey}`,
             "Content-Type": `application/json`
           }
         })
@@ -76,16 +75,18 @@ module.exports = {
         });
     },
     write: (id, object, apikey) => {
-      moduleInstanceOfAxios.put(
-        `/1173590/episodes/` + id.toString() + `.json`,
-        object,
-        {
-          headers: {
-            "Authorization": `Token token=${apikey}`,
-            "Content-Type": `application/json`
+      if (process.env.WRITE_ACC == 1) {
+        moduleInstanceOfAxios.put(
+          `/1173590/episodes/` + id.toString() + `.json`,
+          object,
+          {
+            headers: {
+              Authorization: `Token token=${apikey}`,
+              "Content-Type": `application/json`
+            }
           }
-        }
-      );
+        );
+      }
     }
   },
   QuoteRequest: (after) => {

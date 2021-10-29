@@ -252,14 +252,18 @@ app.post(`/find/and/replace/confirm`, (req, res) => {
         if (item.title.search(find) !== -1) {
           id = item.id;
           modtitle = `${item.title.split("(")[0]} ( ${replace} )`;
-          rh.buzzsprout.write(id, { 
-            title: modtitle,
-            artist: `${replace}`
-           }, process.env.API_KEY);
+          rh.buzzsprout.write(
+            id,
+            {
+              title: modtitle,
+              artist: `${replace}`
+            },
+            process.env.API_KEY
+          );
         }
       });
     }, process.env.API_KEY);
- }
+  }
 });
 
 app.post(`/find/and/replace/diff`, (req, res) => {
