@@ -62,36 +62,13 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       extraordinaryBit = extbit;
     });
     websiteContent.forEach((item, _i) => {
-      if (item.total_plays <= first) {
-        perf = `&#128546;&#128557; (Lowest downloads)`;
-      } else if (item.total_plays <= second) {
-        perf = `&#128532;&#128553; (Not doing well)`;
-      } else if (item.total_plays <= third) {
-        perf = `&#128580;&#128530; (Ok)`;
-      } else if (item.total_plays <= forth) {
-        perf = `&#9786;&#128077; (Very Good)`;
-      } else {
-        perf = `&#128526;&#129315; (Extraordinary)`;
-      }
-      if (typeof htmlString == `undefined`) {
-        htmlString = `Title: ${
-          item.title
-        } ;  <a href="https://www.buzzsprout.com/1173590/${
-          item.id
-        }"> Location</a> ;  Downloads: ${item.total_plays} ; Published date: ${
-          item.published_at.split("T")[0]
-        } ; Performance: &#128526;&#9786;&#129315;&#128077; (Has no defination) <br/><br/>`;
-      } else {
-        htmlString = `${htmlString} Title: ${
-          item.title
-        } ;  <a href="https://www.buzzsprout.com/1173590/${
-          item.id
-        }"> Location</a> ;  Downloads: ${item.total_plays} ; Published date: ${
-          item.published_at.split("T")[0]
-        } ; Performance: ${perf} <br/><br/>`;
-      }
       total_plays = total_plays + item.total_plays;
     });
+    var htmlString = `<h3>🥇🏆🎉First <a src="https://www.buzzsprout.com/1173590/${websiteContent[0].id}">${websiteContent[0].title}</a> which has ${websiteContent[0].total_plays} downloads </h3>`;
+    htmlString += `<h3>🥈🏆🎉Second <a src="https://www.buzzsprout.com/1173590/${websiteContent[1].id}">${websiteContent[1].title}</a> which has ${websiteContent[1].total_plays} downloads </h3>`;
+    
+     htmlString += `<h3>🥉🏆🎉Third <a src="https://www.buzzsprout.com/1173590/${websiteContent[2].id}">${websiteContent[2].title}</a> which has ${websiteContent[2].total_plays} downloads </h3>`;
+    
     authors.sort((a, b) => {
       if (a.downloads > b.downloads) {
         return -1;
@@ -119,7 +96,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       }</td></tr>`;
     });
     preString = preString + `<table>`;
-    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all podcasts ${total_plays} </strong><h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
+    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all podcasts ${total_plays} </strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 });
