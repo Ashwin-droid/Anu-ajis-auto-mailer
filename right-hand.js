@@ -1,7 +1,7 @@
 const env = require(`dotenv`).config();
 const axios = require(`axios`);
 const nodemailer = require(`nodemailer`);
-const { google } = require("googleapis");
+const { google } = require(`googleapis`);
 const OAuth2 = google.auth.OAuth2;
 const TextCleaner = require(`text-cleaner`);
 const moduleInstanceOfAxios = axios.create({
@@ -15,7 +15,7 @@ module.exports = {
       const oauth2Client = new OAuth2(
         process.env.CLIENT_ID,
         process.env.CLIENT_SECRET,
-        "https://developers.google.com/oauthplayground"
+        `https://developers.google.com/oauthplayground`
       );
 
       oauth2Client.setCredentials({
@@ -25,16 +25,16 @@ module.exports = {
       const accessToken = await new Promise((resolve, reject) => {
         oauth2Client.getAccessToken((err, token) => {
           if (err) {
-            reject("Failed to create access token :(");
+            reject(`Failed to create access token :(`);
           }
           resolve(token);
         });
       });
 
       const transporter = nodemailer.createTransport({
-        service: "gmail",
+        service: `gmail`,
         auth: {
-          type: "OAuth2",
+          type: `OAuth2`,
           user: process.env.EMAIL,
           accessToken,
           clientId: process.env.CLIENT_ID,
