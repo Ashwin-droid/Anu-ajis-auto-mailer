@@ -64,7 +64,8 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     websiteContent.forEach((item, _i) => {
       total_plays = total_plays + item.total_plays;
     });
-    var htmlString = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${websiteContent[0].id}">${websiteContent[0].title}</a> which has ${websiteContent[0].total_plays} downloads </h2>`;
+    var htmlString = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${websiteContent[0].id}">${websiteContent[0].title}</a> which has ${websiteContent[0].total_plays} downloads </h2>
+    <iframe src="https://www.buzzsprout.com/1173590/8765861-?client_source=small_player&iframe=true" loading="lazy" width="100%" height="200" frameborder="0" scrolling="no" title='Life of Stories, यमराज, सत्यवान- सावित्री कथा         ( प्रा. सौ. अनुराधा भडसावळे. )'></iframe>`;
     htmlString += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${websiteContent[1].id}">${websiteContent[1].title}</a> which has ${websiteContent[1].total_plays} downloads </h3>`;
     
      htmlString += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${websiteContent[2].id}">${websiteContent[2].title}</a> which has ${websiteContent[2].total_plays} downloads </h4>`;
@@ -86,7 +87,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         var id = i + 1;
         ExtraOrdinaryHtml = `${ExtraOrdinaryHtml} <h2>Title no ${id}, Title ${item.title} </h2>`;
       });
-      rh.email(ExtraOrdinaryHtml);
+      longStringOfInformation += ExtraOrdinaryHtml;
     }
     authors.forEach((item, _i) => {
       preString = `${preString} <tr><td style='padding:10px'>${
