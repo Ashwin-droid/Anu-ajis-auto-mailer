@@ -70,6 +70,18 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       }
       return 0;
     });
+    websiteContent.sort((a, b) => {
+      var d1 = new Date(a.published_at);
+      var d2 = new Date(b.published_at);
+      if (d1 > d2){
+        return -1
+      } else if (d1 < d2){
+        return 1
+      } else {
+        return 0
+      }
+    });
+    console.log(websiteContent.published_at)
     var preString = `<table><tr><td><h3>Author</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td></tr>`;
     var ExtraOrdinaryHtml;
     if (extraordinaryBit) {
