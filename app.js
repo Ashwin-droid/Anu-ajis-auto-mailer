@@ -44,17 +44,9 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       }
       return 0;
     });
-    const highestValue = websiteContent[1].total_plays;
-    const lowestValue = websiteContent[websiteContent.length - 1].total_plays;
-    const fiveUnEqualDivisions = (highestValue - lowestValue) / 5;
-    const first = fiveUnEqualDivisions - 50,
-      second = fiveUnEqualDivisions * 2 - 50,
-      third = fiveUnEqualDivisions * 3 - 50,
-      forth = fiveUnEqualDivisions * 4 - 50;
     //filter data
     var htmlString;
     var total_plays = 0;
-    var perf;
     var authors = [];
     rh.CheckForAuthors(websiteContent, (authorArray, extTitles, extbit) => {
       authors = authorArray;
