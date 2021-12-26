@@ -85,11 +85,6 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     for (var i = 0; i < 5; i++){
       htmlString += `<h6>Title:  ${websiteContent[i].title} downloads: ${websiteContent[i].total_plays}</h6>`; 
     }
-    htmlString += `<h1>Oldest</h1>`;
-    for (var i = 0; i < 5; i++){
-      var l = websiteContent.length - i;
-      htmlString += `<h6>Title:  ${websiteContent[l].title} downloads: ${websiteContent[l].total_plays}</h6>`; 
-    }
     var preString = `<table><tr><td><h3>Author</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td></tr>`;
     var ExtraOrdinaryHtml;
     if (extraordinaryBit) {
