@@ -83,11 +83,11 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     });
     htmlString += `<h1>Latest 5</h1>`;
     for (var i = 0; i < 5; i++){
-      htmlString += `<h6>Title:  <a href="https://www.buzzsprout.com/1173590/${websiteContent[i].id}">${websiteContent[i].title} </a>downloads: ${websiteContent[i].total_plays}</h6>`; 
+      htmlString += `<h6>Title:  <a href="https://www.buzzsprout.com/1173590/${websiteContent[i].id}">${websiteContent[i].title} </a>which has  ${websiteContent[i].total_plays} downloads</h6>`; 
     }
     htmlString += `<h1>Oldest 5</h1>`;
-    for (var i = 1; i != 5; i++){
-      htmlString += `<h6>Title:  <a href="https://www.buzzsprout.com/1173590/${websiteContent[websiteContent.length - i - 1].id}">${websiteContent [websiteContent.length - i - 1].title} </a>downloads: ${websiteContent[websiteContent.length - i - 1].total_plays}</h6>`; 
+    for (var i = 1; i != 6; i++){
+      htmlString += `<h6>Title:  <a href="https://www.buzzsprout.com/1173590/${websiteContent[websiteContent.length - i - 1].id}">${websiteContent [websiteContent.length - i - 1].title} </a> which has ${websiteContent[websiteContent.length - i - 1].total_plays} downloads </h6>`; 
     }
     var preString = `<table><tr><td><h3>Author</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td></tr>`;
     var ExtraOrdinaryHtml;
