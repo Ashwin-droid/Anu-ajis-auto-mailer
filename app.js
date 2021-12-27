@@ -85,7 +85,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     var tply = 0;
     for (var i = 0; i < 5; i++){
       tply += websiteContent[i].total_plays;
-      htmlString += `<h6>Title:  <a href="https://www.buzzsprout.com/1173590/${websiteContent[i].id}">${websiteContent[i].title} </a>which has  ${websiteContent[i].total_plays} downloads</h6><hr>`; 
+      htmlString += `<h6>${i + 1}) Title:  <a href="https://www.buzzsprout.com/1173590/${websiteContent[i].id}">${websiteContent[i].title} </a>which has  ${websiteContent[i].total_plays} downloads</h6><hr>`; 
     }
     htmlString += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(tply / 5)}</strong></h5>`;
     var preString = `<table><tr><td><h3>Author</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td><td><h3>Avrage</h3></td></tr>`;
