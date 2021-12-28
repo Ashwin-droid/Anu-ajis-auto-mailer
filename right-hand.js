@@ -136,7 +136,8 @@ module.exports = {
           authors.push({
             author: author1,
             downloads: item.total_plays,
-            entries: 1
+            entries: 1,
+            duration: item.duration
           });
         } else {
           function bodge(array, key, value, after) {
@@ -153,6 +154,7 @@ module.exports = {
               array[Index].downloads =
                 authors[Index].downloads + item.total_plays;
               array[Index].entries = authors[Index].entries + 1;
+              array[Index].duration = authors[Index].duration + item.duration;
             });
           });
         }
