@@ -186,5 +186,6 @@ module.exports = {
       formattedTime = formattedTime + `${hours}:`;
     }
     formattedTime = formattedTime + `${minutes}:${seconds}`;
+    return formattedTime;
   }
 };
