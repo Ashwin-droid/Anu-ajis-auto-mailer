@@ -48,6 +48,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     var htmlString;
     var total_plays = 0;
     var duration = 0;
+    var totalPlayTime = 0;
     var authors = [];
     rh.CheckForAuthors(websiteContent, (authorArray, extTitles, extbit) => {
       authors = authorArray;
@@ -56,7 +57,8 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     });
     websiteContent.forEach((item, _i) => {
       total_plays = total_plays + item.total_plays;
-      duration = duration + item.duration
+      duration = duration + item.duration;
+      totalPlayTime = totalPlayTime + (item.duration * item.total_plays)
     });
     var htmlString = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${websiteContent[0].id}">${websiteContent[0].title}</a> which has ${websiteContent[0].total_plays} downloads </h2>`;
     htmlString += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${websiteContent[1].id}">${websiteContent[1].title}</a> which has ${websiteContent[1].total_plays} downloads </h3>`;
@@ -109,7 +111,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     });
     var avgdown = Math.round(total_plays / websiteContent.length);
     preString = preString + `<table>`;
-    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all podcasts ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(duration)}</strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
+    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all episodes ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(duration)}<br />Total play time on all episodes : ${rh.getFormattedTime(totalPlayTime)}</strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 });
