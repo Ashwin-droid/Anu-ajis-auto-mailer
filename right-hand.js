@@ -161,5 +161,30 @@ module.exports = {
       }
     });
     after(authors, extraordinarytitles, extraordinaryBit);
+  },
+  getFormattedTime: (seconds) => {
+    var days = 0;
+    var hours = 0;
+    var minutes = 0;
+    var formattedTime = ``;
+    for (var i = 1; seconds >= 86400; i++) {
+      days = i;
+      seconds = seconds - 86400;
+    }
+    for (var i = 1; seconds >= 3600; i++) {
+      hours = i;
+      seconds = seconds - 3600;
+    }
+    for (var i = 1; seconds >= 60; i++) {
+      minutes = i;
+      seconds = seconds - 60;
+    }
+    if (days > 0) {
+      formattedTime = formattedTime + `${days}:`;
+    }
+    if (hours > 0){
+      formattedTime = formattedTime + `${hours}:`;
+    }
+    formattedTime = formattedTime + `${minutes}:${seconds}`;
   }
 };

@@ -105,11 +105,11 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         item.author
       }</td><td>${item.downloads.toString()}</td><td style='padding:10px;'>${
         item.entries
-      }</td><td>${Math.round(item.downloads / item.entries)}</td><td>${item.duration}</td></tr>`;
+      }</td><td>${Math.round(item.downloads / item.entries)}</td><td>${rh.getFormattedTime(item.duration)}</td></tr>`;
     });
     var avgdown = Math.round(total_plays / websiteContent.length);
     preString = preString + `<table>`;
-    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all podcasts ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${duration}</strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
+    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all podcasts ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(duration)}</strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 });
