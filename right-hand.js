@@ -166,7 +166,12 @@ module.exports = {
     var days = 0;
     var hours = 0;
     var minutes = 0;
+    var months = 0;
     var formattedTime = ``;
+    for (var i = 1; seconds >= 2592000; i++) {
+      months = i;
+      seconds = seconds - 2592000;
+    }
     for (var i = 1; seconds >= 86400; i++) {
       days = i;
       seconds = seconds - 86400;
@@ -179,13 +184,31 @@ module.exports = {
       minutes = i;
       seconds = seconds - 60;
     }
-    if (days > 0) {
+    if (months >= 10) {
+      formattedTime = formattedTime + `${months}:`;
+    } else if (months > 0) {
+      formattedTime = formattedTime + `0${months}`;
+    }
+    if (days >= 10) {
       formattedTime = formattedTime + `${days}:`;
+    } else if (days > 0) {
+      formattedTime = formattedTime + `0${days}:`;
     }
-    if (hours > 0){
+    if (hours >= 10){
       formattedTime = formattedTime + `${hours}:`;
+    } else if (hours > 0) {
+      formattedTime = formattedTime + `0${hours}:`;
     }
-    formattedTime = formattedTime + `${minutes}:${seconds}`;
+    if (minutes >= 10) {
+      formattedTime = formattedTime + `${minutes}:`;
+    } else {
+      formattedTime = formattedTime + `0${minutes}:`;
+    }
+    if (seconds >= 10){
+      formattedTime = formattedTime + seconds;
+    } else {
+      formattedTime = formattedTime + `0${seconds}`;
+    }
     return formattedTime;
   }
 };
