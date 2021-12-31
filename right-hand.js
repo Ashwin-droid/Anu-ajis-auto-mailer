@@ -209,7 +209,7 @@ module.exports = {
       } else {
         formattedTime = ``;
         fta2.forEach((item) => {
-          formattedTime = formattedTime + `${item}:`;
+          formattedTime = formattedTime + `${item} :`;
         });
         formattedTime = formattedTime.slice(0, -1);
         return formattedTime;

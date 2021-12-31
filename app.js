@@ -139,7 +139,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       duration
     )}<br />Total play time on all episodes : ${rh.getFormattedTime(
       totalPlayTime
-    )}</strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
+    )}<br />Avrage play time : ${rh.getFormattedTime(Math.round(totalPlayTime / total_plays))} <br />Avrage story time : ${rh.getFormattedTime(Math.round(duration / total_plays))} </strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 });
