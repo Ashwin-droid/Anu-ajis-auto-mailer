@@ -100,7 +100,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     htmlString += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(
       tply / 5
     )}</strong></h5>`;
-    var preString = `<table><tr><td><h3>Artist</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td><td><h3>Avrage</h3></td><td><h3>Time</h3></td></tr>`;
+    var preString = `<table><tr><td><h3>Artist</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td><td><h3>Avrage</h3></td><td style='padding:10px;' ><h3>Time</h3></td><td><h3>Play Time</h3></td></tr>`;
     var ExtraOrdinaryHtml;
     if (extraordinaryBit) {
       ExtraOrdinaryHtml = `<h1>Some Code-Breaking ExtraOrdinary Titles</h1>`;
@@ -131,7 +131,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         item.entries
       }</td><td>${Math.round(
         item.downloads / item.entries
-      )}</td><td>${rh.getFormattedTime(item.duration)}</td></tr>`;
+      )}</td><td>${rh.getFormattedTime(item.duration)}</td><td style='padding:10px;'>${rh.getFormattedTime(item.TPlayTime)}</td></tr>`;
     });
     var avgdown = Math.round(total_plays / websiteContent.length);
     preString = preString + `<table>`;

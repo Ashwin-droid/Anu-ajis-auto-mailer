@@ -99,15 +99,6 @@ module.exports = {
         console.log(error);
       });
   },
-  GetArrayindexs: (array, key, value, after) => {
-    var indexes = [];
-    array.forEach((item, i) => {
-      if (item[key] == value) {
-        indexes.push(i);
-      }
-    });
-    after(array, indexes);
-  },
   CheckForAuthors: (array, after) => {
     var authors = [];
     var extraordinarytitles = [];
@@ -137,7 +128,8 @@ module.exports = {
             author: author1,
             downloads: item.total_plays,
             entries: 1,
-            duration: item.duration
+            duration: item.duration,
+            TPlayTime: item.duration * item.total_plays
           });
         } else {
           function bodge(array, key, value, after) {
@@ -151,10 +143,10 @@ module.exports = {
           }
           bodge(authors, `author`, author1, (array, indexes) => {
             indexes.forEach((Index) => {
-              array[Index].downloads =
-                authors[Index].downloads + item.total_plays;
+              array[Index].downloads = authors[Index].downloads + item.total_plays;
               array[Index].entries = authors[Index].entries + 1;
               array[Index].duration = authors[Index].duration + item.duration;
+              array[Index].TPlayTime = authors[Index].TPlayTime + (item.duration * item.total_plays);
             });
           });
         }
