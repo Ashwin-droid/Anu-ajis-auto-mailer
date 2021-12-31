@@ -187,7 +187,7 @@ module.exports = {
     if (months >= 10) {
       formattedTime = formattedTime + `${months}:`;
     } else if (months > 0) {
-      formattedTime = formattedTime + `0${months}`;
+      formattedTime = formattedTime + `0${months}:`;
     }
     if (days >= 10) {
       formattedTime = formattedTime + `${days}:`;
