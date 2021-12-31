@@ -186,17 +186,17 @@ module.exports = {
     }
     if (months >= 10) {
       formattedTime = formattedTime + `${months}:`;
-    } else if (months > 0) {
+    } else {
       formattedTime = formattedTime + `0${months}:`;
     }
     if (days >= 10) {
       formattedTime = formattedTime + `${days}:`;
-    } else if (days > 0) {
+    } else {
       formattedTime = formattedTime + `0${days}:`;
     }
     if (hours >= 10){
       formattedTime = formattedTime + `${hours}:`;
-    } else if (hours > 0) {
+    } else {
       formattedTime = formattedTime + `0${hours}:`;
     }
     if (minutes >= 10) {
@@ -209,6 +209,19 @@ module.exports = {
     } else {
       formattedTime = formattedTime + `0${seconds}`;
     }
+    var fta = formattedTime.split(`:`);
+    fta.forEach((item, i) => {
+      if (item == `00`){
+        fta.splice(i, 1);
+      } else {
+        break;
+      }
+    });
+    formattedTime = ``;
+    fta.forEach((item) => {
+      formattedTime = formattedTime + `${item}:`;
+    });
+    formattedTime = formattedTime.slice(0, -1);
     return formattedTime;
   }
 };
