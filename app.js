@@ -58,13 +58,13 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     websiteContent.forEach((item, _i) => {
       total_plays = total_plays + item.total_plays;
       duration = duration + item.duration;
-      totalPlayTime = totalPlayTime + (item.duration * item.total_plays)
+      totalPlayTime = totalPlayTime + item.duration * item.total_plays;
     });
     var htmlString = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${websiteContent[0].id}">${websiteContent[0].title}</a> which has ${websiteContent[0].total_plays} downloads </h2>`;
     htmlString += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${websiteContent[1].id}">${websiteContent[1].title}</a> which has ${websiteContent[1].total_plays} downloads </h3>`;
-    
-     htmlString += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${websiteContent[2].id}">${websiteContent[2].title}</a> which has ${websiteContent[2].total_plays} downloads </h4>`;
-    
+
+    htmlString += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${websiteContent[2].id}">${websiteContent[2].title}</a> which has ${websiteContent[2].total_plays} downloads </h4>`;
+
     authors.sort((a, b) => {
       if (a.downloads > b.downloads) {
         return -1;
@@ -77,21 +77,29 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     websiteContent.sort((a, b) => {
       var d1 = new Date(a.published_at);
       var d2 = new Date(b.published_at);
-      if (d1 > d2){
-        return -1
-      } else if (d1 < d2){
-        return 1
+      if (d1 > d2) {
+        return -1;
+      } else if (d1 < d2) {
+        return 1;
       } else {
-        return 0
+        return 0;
       }
     });
     htmlString += `<h1>Latest 5</h1>`;
     var tply = 0;
-    for (var i = 0; i < 5; i++){
+    for (var i = 0; i < 5; i++) {
       tply += websiteContent[i].total_plays;
-      htmlString += `<h6>${i + 1}) Title:  <a href="https://www.buzzsprout.com/1173590/${websiteContent[i].id}">${websiteContent[i].title} </a>which has  ${websiteContent[i].total_plays} downloads</h6><hr>`; 
+      htmlString += `<h6>${
+        i + 1
+      }) Title:  <a href="https://www.buzzsprout.com/1173590/${
+        websiteContent[i].id
+      }">${websiteContent[i].title} </a>which has  ${
+        websiteContent[i].total_plays
+      } downloads</h6><hr>`;
     }
-    htmlString += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(tply / 5)}</strong></h5>`;
+    htmlString += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(
+      tply / 5
+    )}</strong></h5>`;
     var preString = `<table><tr><td><h3>Artist</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td><td><h3>Avrage</h3></td><td><h3>Time</h3></td></tr>`;
     var ExtraOrdinaryHtml;
     if (extraordinaryBit) {
@@ -107,11 +115,17 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         item.author
       }</td><td>${item.downloads.toString()}</td><td style='padding:10px;'>${
         item.entries
-      }</td><td>${Math.round(item.downloads / item.entries)}</td><td>${rh.getFormattedTime(item.duration)}</td></tr>`;
+      }</td><td>${Math.round(
+        item.downloads / item.entries
+      )}</td><td>${rh.getFormattedTime(item.duration)}</td></tr>`;
     });
     var avgdown = Math.round(total_plays / websiteContent.length);
     preString = preString + `<table>`;
-    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all episodes ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(duration)}<br />Total play time on all episodes : ${rh.getFormattedTime(totalPlayTime)}</strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
+    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all episodes ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(
+      duration
+    )}<br />Total play time on all episodes : ${rh.getFormattedTime(
+      totalPlayTime
+    )}</strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 });

@@ -185,43 +185,43 @@ module.exports = {
       seconds = seconds - 60;
     }
     if (months >= 10) {
-      formattedTime = formattedTime + `${months}:`;
+      formattedTime += `${months}mo:`;
     } else {
-      formattedTime = formattedTime + `0${months}:`;
+      formattedTime += `0${months}mo:`;
     }
     if (days >= 10) {
-      formattedTime = formattedTime + `${days}:`;
+      formattedTime += `${days}d:`;
     } else {
-      formattedTime = formattedTime + `0${days}:`;
+      formattedTime += `0${days}d:`;
     }
     if (hours >= 10){
-      formattedTime = formattedTime + `${hours}:`;
+      formattedTime += `${hours}h:`;
     } else {
-      formattedTime = formattedTime + `0${hours}:`;
+      formattedTime += `0${hours}h:`;
     }
     if (minutes >= 10) {
-      formattedTime = formattedTime + `${minutes}:`;
+      formattedTime += `${minutes}m:`;
     } else {
-      formattedTime = formattedTime + `0${minutes}:`;
+      formattedTime += `0${minutes}m:`;
     }
     if (seconds >= 10){
-      formattedTime = formattedTime + seconds;
+      formattedTime += `${seconds}s`;
     } else {
-      formattedTime = formattedTime + `0${seconds}`;
+      formattedTime += `0${seconds}s`;
     }
     var fta = formattedTime.split(`:`);
-    fta.forEach((item, i) => {
-      if (item == `00`){
-        fta.splice(i, 1);
+    var fta2 = formattedTime.split(`:`);
+    for(const item of fta) {
+      if (item == `00mo` || item == `00d` || item == `00h` || item == `00m`){
+        fta2.splice(fta2.indexOf(item), 1);
       } else {
-        break;
+        formattedTime = ``;
+        fta2.forEach((item) => {
+          formattedTime = formattedTime + `${item}:`;
+        });
+        formattedTime = formattedTime.slice(0, -1);
+        return formattedTime;
       }
-    });
-    formattedTime = ``;
-    fta.forEach((item) => {
-      formattedTime = formattedTime + `${item}:`;
-    });
-    formattedTime = formattedTime.slice(0, -1);
-    return formattedTime;
+    }
   }
 };
