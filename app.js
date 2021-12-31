@@ -109,6 +109,20 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         ExtraOrdinaryHtml = `${ExtraOrdinaryHtml} <h2>Title no ${id}, Title ${item.title} </h2>`;
       });
       longStringOfInformation += ExtraOrdinaryHtml;
+    } else {
+      websiteContent.forEach((item, i) => {
+        var cleanArtist = TextCleaner(item.title.split(`(`)[1])
+          .remove(`)`)
+          .trim()
+          .valueOf();
+        if (item.artist != cleanArtist) {
+          rh.buzzsprout.write(
+            item.id,
+            { artist: cleanArtist },
+            process.env.API_KEY
+          );
+        }
+      });
     }
     authors.forEach((item, _i) => {
       preString = `${preString} <tr><td style='padding:10px'>${
@@ -379,6 +393,12 @@ app.post(`/admin/handler/`, (req, res) => {
   }
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Hit me on http://localhost:${port}/`);
+});
+
+process.on("SIGTERM", () => {
+  server.close(() => {
+    console.log("Graceful shutdown");
+  });
 });
