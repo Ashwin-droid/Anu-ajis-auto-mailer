@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node app.js",
     "deploy": "deploy.bat",
-    "amend": "deploy.bat -f --amend"
+    "amend": "deploy.bat -f --amend",
+    "dependency update": "npx npm-check -u -y && git add . && git commit -m \"dependency update\" && git push origin master"
   },
   "repository": {
     "type": "git",
@@ -23,11 +24,11 @@
   },
   "homepage": "https://github.com/Ashwin-droid/Anu-ajis-auto-mailer#readme",
   "dependencies": {
-    "axios": "^0.26.0",
+    "axios": "^0.26.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
-    "googleapis": "^95.0.0",
+    "googleapis": "^97.0.0",
     "nodemailer": "^6.7.2",
     "text-cleaner": "^1.2.1"
   }
