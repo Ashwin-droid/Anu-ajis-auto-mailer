@@ -89,6 +89,12 @@ module.exports = {
       }
     }
   },
+  NASAAPODRequest : (after, api_key) => {
+    request.get(`https://api.nasa.gov/planetary/apod?api_key=${api_key}`)
+    .then((response) => {
+      after(response.data);
+      })
+    },
   QuoteRequest: (after) => {
     request
       .get(`https://zenquotes.io/api/random`)

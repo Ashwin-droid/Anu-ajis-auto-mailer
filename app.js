@@ -4,6 +4,7 @@ const express = require(`express`);
 const rh = require(`./right-hand.js`);
 const TextCleaner = require(`text-cleaner`);
 const cookieParser = require(`cookie-parser`);
+const { NASAAPODRequest } = require("./right-hand.js");
 const app = express();
 app.use(cookieParser());
 
@@ -23,6 +24,8 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
   var quote;
   var extraordinaryBit = false;
   var extraordinarytitles = [];
+  var imgurl = "";
+  var title = "";
 
   rh.buzzsprout.read((bd) => {
     websiteContent = bd;
@@ -32,8 +35,13 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     });
   }, process.env.API_KEY);
 
+  NASAAPODRequest((apod) => {
+    imgurl = apod.url;
+    title = apod.title;
+  }, process.env.NASA_API_KEY);
+
   function postfech() {
-    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${websiteContent.length} </h4> <p>`;
+    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>NASA Image of the day</h2><h3>${title}</h3><img src="${imgurl}" alt="${title}" /><br /><h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${websiteContent.length} </h4> <p>`;
     // sort data based on highest value
     websiteContent.sort((a, b) => {
       if (a.total_plays > b.total_plays) {
@@ -50,21 +58,25 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     var duration = 0;
     var totalPlayTime = 0;
     var authors = [];
+    // beating heart of the code,the compound illitrator
     rh.CheckForAuthors(websiteContent, (authorArray, extTitles, extbit) => {
       authors = authorArray;
       extraordinarytitles = extTitles;
       extraordinaryBit = extbit;
     });
+    //genral illitrator (vague)
     websiteContent.forEach((item, _i) => {
       total_plays = total_plays + item.total_plays;
       duration = duration + item.duration;
       totalPlayTime = totalPlayTime + item.duration * item.total_plays;
     });
+
+    //first 3 highest episodes
     var htmlString = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${websiteContent[0].id}">${websiteContent[0].title}</a> which has ${websiteContent[0].total_plays} downloads </h2>`;
     htmlString += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${websiteContent[1].id}">${websiteContent[1].title}</a> which has ${websiteContent[1].total_plays} downloads </h3>`;
-
     htmlString += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${websiteContent[2].id}">${websiteContent[2].title}</a> which has ${websiteContent[2].total_plays} downloads </h4>`;
 
+    //sort authors according to highest value
     authors.sort((a, b) => {
       if (a.downloads > b.downloads) {
         return -1;
@@ -74,6 +86,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       }
       return 0;
     });
+    // sort according to latest date
     websiteContent.sort((a, b) => {
       var d1 = new Date(a.published_at);
       var d2 = new Date(b.published_at);
@@ -86,7 +99,9 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       }
     });
     htmlString += `<h1>Latest 5</h1>`;
+    // latest 5
     var tply = 0;
+    // total plays for latest 5 & tabulate the data
     for (var i = 0; i < 5; i++) {
       tply += websiteContent[i].total_plays;
       htmlString += `<h6>${
@@ -100,6 +115,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     htmlString += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(
       tply / 5
     )}</strong></h5>`;
+    // garbage for the table
     var preString = `<table><tr><td><h3>Artist</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td><td><h3>Avrage</h3></td><td style='padding:10px;' ><h3>Time</h3></td><td><h3>Play Time</h3></td></tr>`;
     var ExtraOrdinaryHtml;
     if (extraordinaryBit) {
@@ -149,6 +165,7 @@ app.get(`/split/mailer/` + process.env.AUTH_KEY, (_req, res) => {
   function postdone(data) {
     var authors = [];
     var extraordinaryBit = false;
+    // beating heart of the code,the compound illitrator
     rh.CheckForAuthors(data, (authorArray, _extTitles, extbit) => {
       authors = authorArray;
       extraordinaryBit = extbit;
@@ -227,6 +244,7 @@ app.get(`/find/and/replace`, (req, res) => {
     var HTML = `<!DOCTYPE html><html> <head> <meta name="viewport" content="width=device-width, initial-scale=1.0"><script>var hrefTracker;var hrefTracker2; console.log(hrefTracker);console.log(hrefTracker2);</script> <meta charset="utf-8"/> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous"/> </head> <body> <div style="margin: 10px" class="position-absolute top-50 start-50 translate-middle" > <div class="encoder"> <div class="input-group flex-nowrap margin-10"> <span class="input-group-text" id="addon-wrapping02">Find</span> <div class="dropdown form-control" aria-describedby="addon-wrapping01" > <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" > Author </button> <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">`;
     var author = ``;
     rh.buzzsprout.read((data) => {
+      // beating heart of the code,the compound illitrator
       rh.CheckForAuthors(data, (authors, _ul, extbit) => {
         if (!extbit) {
           authors.forEach((item, i) => {
