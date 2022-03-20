@@ -160,85 +160,6 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
   }
 });
 
-app.get(`/split/mailer/` + process.env.AUTH_KEY, (_req, res) => {
-  rh.buzzsprout.read(postdone, process.env.API_KEY);
-  function postdone(data) {
-    var authors = [];
-    var extraordinaryBit = false;
-    // beating heart of the code,the compound illitrator
-    rh.CheckForAuthors(data, (authorArray, _extTitles, extbit) => {
-      authors = authorArray;
-      extraordinaryBit = extbit;
-    });
-    data.sort((a, b) => {
-      if (a.total_plays > b.total_plays) {
-        return -1;
-      }
-      if (a.total_plays < b.total_plays) {
-        return 1;
-      }
-      return 0;
-    });
-    authors.sort((a, b) => {
-      if (a.downloads > b.downloads) {
-        return -1;
-      }
-      if (a.downloads < b.downloads) {
-        return 1;
-      }
-      return 0;
-    });
-    if (extraordinaryBit) {
-      res.send(
-        `<h1>You have extraordinary titles, please re-request the daily mail and fix the extraordinary titles to proceed</h1>`
-      );
-    } else {
-      res.send(`Action Started`);
-      var author;
-      var total_plays;
-      var htmlString = ``;
-      authors.forEach((item, _i) => {
-        total_plays = 0;
-        htmlString = ``;
-        longStringOfInformation = ``;
-        author = item.author;
-        longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><h1>Good morning, ${author} </h1><br/><br/>`;
-        data.forEach((uslessInfo, _i) => {
-          if (
-            author ==
-            TextCleaner(uslessInfo.title.split(`(`)[1])
-              .remove(`)`)
-              .trim()
-              .valueOf()
-          ) {
-            total_plays = total_plays + uslessInfo.total_plays;
-            htmlString = `${htmlString}<h3>Title : ${
-              uslessInfo.title
-            }; <a href="https://www.buzzsprout.com/1173590/${
-              uslessInfo.id
-            }"> Location</a> ; Downloads: ${
-              uslessInfo.total_plays
-            }; Published date: ${
-              uslessInfo.published_at.split("T")[0]
-            } <br/></h3>`;
-          }
-        });
-        var preString = `<table><tr><td><h3>Author</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td></tr>`;
-        authors.forEach((item, _i) => {
-          preString = `${preString} <tr><td style='padding:10px'> ${
-            item.author
-          } </td><td> ${item.downloads.toString()} </td><td style='padding:10px'> ${
-            item.entries
-          } </td></tr>`;
-        });
-        preString = `${preString} <table>;`;
-        longStringOfInformation = `${longStringOfInformation}<h2>Total plays on all your podcasts ${total_plays} </h2> ${htmlString} ${preString}`;
-        rh.email(longStringOfInformation);
-      });
-    }
-  }
-});
-
 app.get(`/find/and/replace`, (req, res) => {
   if (req.query.key == process.env.AUTH_KEY2) {
     var HTML = `<!DOCTYPE html><html> <head> <meta name="viewport" content="width=device-width, initial-scale=1.0"><script>var hrefTracker;var hrefTracker2; console.log(hrefTracker);console.log(hrefTracker2);</script> <meta charset="utf-8"/> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous"/> </head> <body> <div style="margin: 10px" class="position-absolute top-50 start-50 translate-middle" > <div class="encoder"> <div class="input-group flex-nowrap margin-10"> <span class="input-group-text" id="addon-wrapping02">Find</span> <div class="dropdown form-control" aria-describedby="addon-wrapping01" > <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" > Author </button> <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">`;
@@ -372,10 +293,6 @@ app.get(`/administration/tools/`, (req, res) => {
         text: `Re-Request Daily Mail`
       },
       {
-        url: `/admin/handler?param=smail&auth=${process.env.AUTH_KEY2}&`,
-        text: `Request A split mail`
-      },
-      {
         url: `/admin/handler?param=far&auth=${process.env.AUTH_KEY2}&`,
         text: `Find and replace authors`
       }
@@ -396,8 +313,6 @@ app.post(`/admin/handler/`, (req, res) => {
       const target = req.query.param;
       if (target == `dmail`) {
         res.redirect(`/autotrg/ifttt/auth/${process.env.AUTH_KEY}`);
-      } else if (target == `smail`) {
-        res.redirect(`/split/mailer/${process.env.AUTH_KEY}`);
       } else if (target == `far`) {
         res.redirect(`/find/and/replace?key=${process.env.AUTH_KEY2}`);
       } else {
