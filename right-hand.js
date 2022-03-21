@@ -90,7 +90,7 @@ module.exports = {
     }
   },
   NASAAPODRequest : (after, api_key) => {
-    request.get(`https://api.nasa.gov/planetary/apod?api_key=${api_key}`)
+    request.get(`https://api.nasa.gov/planetary/apod?api_key=${api_key}&thumbs=true`)
     .then((response) => {
       after(response.data);
       })
