@@ -75,7 +75,7 @@ module.exports = {
         });
     },
     write: (id, object, apikey) => {
-      if (process.env.WRITE_ACC == 1) {
+      if (process.env.WRITE_ACC === 1) {
         moduleInstanceOfAxios.put(
           `/1173590/episodes/` + id.toString() + `.json`,
           object,
@@ -86,6 +86,9 @@ module.exports = {
             }
           }
         );
+      } else {
+        console.log(`Sadly write is access denied`);
+        console.log(`But if i was granted write access, i would have written:\n${object.toString()}`);
       }
     }
   },
