@@ -4,7 +4,7 @@
   "description": "Anu Aji Automailer",
   "main": "app.js",
   "engines": {
-    "node": "v17.6.0",
+    "node": "v17.8.0",
     "npm": "8.5.3"
   },
   "scripts": {
