@@ -4,8 +4,6 @@ const express = require(`express`);
 const rh = require(`./right-hand.js`);
 const TextCleaner = require(`text-cleaner`);
 const cookieParser = require(`cookie-parser`);
-const { NASAAPODRequest } = require("./right-hand.js");
-const { type } = require("express/lib/response");
 const app = express();
 app.use(cookieParser());
 
@@ -21,7 +19,7 @@ app.get(`/`, (_req, res) => {
 
 app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
   res.send(`Action Started`);
-  var websiteContent;
+  var BuzzsproutResponse;
   var quote;
   var extraordinaryBit = false;
   var extraordinarytitles = [];
@@ -31,14 +29,14 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
   var injection = "";
 
   rh.buzzsprout.read((bd) => {
-    websiteContent = bd;
+    BuzzsproutResponse = bd;
     rh.QuoteRequest((qt) => {
       quote = qt;
       postfech();
     });
-  }, process.env.API_KEY);
+  });
 
-  NASAAPODRequest((apod) => {
+  rh.NASAAPODRequest((apod) => {
     imgurl = apod.url;
     const isVideo = (apod) => {
       (imgurl = apod.thumbnail_url); 
@@ -48,12 +46,12 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     title = apod.title;
     const apoddate = `${apod.date.split("-")[0].split("").slice(2).join("")}${apod.date.split("-")[1]}${apod.date.split("-")[2]}`;
     permalink = `https://apod.nasa.gov/apod/ap${apoddate}.html`;
-  }, process.env.NASA_API_KEY);
+  });
 
   function postfech() {
-    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>NASA Image of the day</h2><a href="${permalink}"><h3>${title}</h3></a><img src="${imgurl}" alt="${title}" /><br />${injection}<h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${websiteContent.length} </h4> <p>`;
+    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>NASA Image of the day</h2><a href="${permalink}"><h3>${title}</h3></a><img src="${imgurl}" alt="${title}" /><br />${injection}<h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${BuzzsproutResponse.length} </h4> <p>`;
     // sort data based on highest value
-    websiteContent.sort((a, b) => {
+    BuzzsproutResponse.sort((a, b) => {
       if (a.total_plays > b.total_plays) {
         return -1;
       }
@@ -69,22 +67,22 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     var totalPlayTime = 0;
     var authors = [];
     // beating heart of the code,the compound illitrator
-    rh.CheckForAuthors(websiteContent, (authorArray, extTitles, extbit) => {
+    rh.CheckForAuthors(BuzzsproutResponse, (authorArray, extTitles, extbit) => {
       authors = authorArray;
       extraordinarytitles = extTitles;
       extraordinaryBit = extbit;
     });
     //genral illitrator (vague)
-    websiteContent.forEach((item, _i) => {
+    BuzzsproutResponse.forEach((item, _i) => {
       total_plays = total_plays + item.total_plays;
       duration = duration + item.duration;
       totalPlayTime = totalPlayTime + item.duration * item.total_plays;
     });
 
     //first 3 highest episodes
-    var htmlString = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${websiteContent[0].id}">${websiteContent[0].title}</a> which has ${websiteContent[0].total_plays} downloads </h2>`;
-    htmlString += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${websiteContent[1].id}">${websiteContent[1].title}</a> which has ${websiteContent[1].total_plays} downloads </h3>`;
-    htmlString += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${websiteContent[2].id}">${websiteContent[2].title}</a> which has ${websiteContent[2].total_plays} downloads </h4>`;
+    var htmlString = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[0].id}">${BuzzsproutResponse[0].title}</a> which has ${BuzzsproutResponse[0].total_plays} downloads </h2>`;
+    htmlString += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[1].id}">${BuzzsproutResponse[1].title}</a> which has ${BuzzsproutResponse[1].total_plays} downloads </h3>`;
+    htmlString += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[2].id}">${BuzzsproutResponse[2].title}</a> which has ${BuzzsproutResponse[2].total_plays} downloads </h4>`;
 
     //sort authors according to highest value
     authors.sort((a, b) => {
@@ -97,7 +95,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       return 0;
     });
     // sort according to latest date
-    websiteContent.sort((a, b) => {
+    BuzzsproutResponse.sort((a, b) => {
       var d1 = new Date(a.published_at);
       var d2 = new Date(b.published_at);
       if (d1 > d2) {
@@ -113,13 +111,13 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     var tply = 0;
     // total plays for latest 5 & tabulate the data
     for (var i = 0; i < 5; i++) {
-      tply += websiteContent[i].total_plays;
+      tply += BuzzsproutResponse[i].total_plays;
       htmlString += `<h6>${
         i + 1
       }) Title:  <a href="https://www.buzzsprout.com/1173590/${
-        websiteContent[i].id
-      }">${websiteContent[i].title} </a>which has  ${
-        websiteContent[i].total_plays
+        BuzzsproutResponse[i].id
+      }">${BuzzsproutResponse[i].title} </a>which has  ${
+        BuzzsproutResponse[i].total_plays
       } downloads</h6><hr>`;
     }
     htmlString += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(
@@ -136,7 +134,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       });
       longStringOfInformation += ExtraOrdinaryHtml;
     } else {
-      websiteContent.forEach((item, i) => {
+      BuzzsproutResponse.forEach((item, i) => {
         var cleanArtist = TextCleaner(item.title.split(`(`)[1])
           .remove(`)`)
           .trim()
@@ -144,8 +142,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         if (item.artist != cleanArtist) {
           rh.buzzsprout.write(
             item.id,
-            { artist: cleanArtist },
-            process.env.API_KEY
+            { artist: cleanArtist }
           );
         }
       });
@@ -159,7 +156,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         item.downloads / item.entries
       )}</td><td>${rh.getFormattedTime(item.duration)}</td><td style='padding:10px;'>${rh.getFormattedTime(item.TPlayTime)}</td></tr>`;
     });
-    var avgdown = Math.round(total_plays / websiteContent.length);
+    var avgdown = Math.round(total_plays / BuzzsproutResponse.length);
     preString = preString + `<table>`;
     longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all episodes ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(
       duration
@@ -201,7 +198,7 @@ app.get(`/find/and/replace`, (req, res) => {
           res.send(`<h1>Extraordinary titles detected</h1>`);
         }
       });
-    }, process.env.API_KEY);
+    });
   } else {
     res.redirect(`/`);
   }
@@ -226,12 +223,11 @@ app.post(`/find/and/replace/confirm`, (req, res) => {
             {
               title: modtitle,
               artist: `${replace}`
-            },
-            process.env.API_KEY
+            }
           );
         }
       });
-    }, process.env.API_KEY);
+    });
   }
 });
 
@@ -256,7 +252,7 @@ app.post(`/find/and/replace/diff`, (req, res) => {
         html +
         `</tbody></table><div><div class="d-grid gap-2"><a role="button" href="/administration/tools/?key=${process.env.AUTH_KEY2}" class="btn btn-outline-success btn-lg" style="margin: 10px;">Back</a></div><form action="/find/and/replace/confirm" method="post"><input type='hidden' name='find' value='${find}' /><input type='hidden' name='replace' value='${replace}' /><div class="d-grid gap-2"><button type="submit" class="btn btn-outline-danger btn-lg" style="margin: 10px;">Proceed</button></div></form></div></div></body></html>`;
       res.send(html);
-    }, process.env.API_KEY);
+    });
   }
 });
 

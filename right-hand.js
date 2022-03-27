@@ -59,11 +59,11 @@ module.exports = {
     });
   },
   buzzsprout: {
-    read: (after, apikey) => {
+    read: (after) => {
       moduleInstanceOfAxios
         .get(`/1173590/episodes.json`, {
           headers: {
-            Authorization: `Token token=${apikey}`,
+            Authorization: `Token token=${process.env.API_KEY}`,
             "Content-Type": `application/json`
           }
         })
@@ -74,14 +74,14 @@ module.exports = {
           console.log(error);
         });
     },
-    write: (id, object, apikey) => {
+    write: (id, object) => {
       if (process.env.WRITE_ACC === 1) {
         moduleInstanceOfAxios.put(
           `/1173590/episodes/` + id.toString() + `.json`,
           object,
           {
             headers: {
-              Authorization: `Token token=${apikey}`,
+              Authorization: `Token token=${process.env.API_KEY}`,
               "Content-Type": `application/json`
             }
           }
@@ -92,8 +92,8 @@ module.exports = {
       }
     }
   },
-  NASAAPODRequest : (after, api_key) => {
-    request.get(`https://api.nasa.gov/planetary/apod?api_key=${api_key}&thumbs=true`)
+  NASAAPODRequest : (after) => {
+    request.get(`https://api.nasa.gov/planetary/apod?api_key=${process.env.NASA_API_KEY}&thumbs=true`)
     .then((response) => {
       after(response.data);
       })
