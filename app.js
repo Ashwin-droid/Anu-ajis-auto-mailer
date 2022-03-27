@@ -20,7 +20,7 @@ app.get(`/`, (_req, res) => {
 app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
   res.send(`Action Started`);
   var BuzzsproutResponse;
-  var quote;
+  var quote = "";
   var extraordinaryBit = false;
   var extraordinarytitles = [];
   var imgurl = "";
@@ -39,12 +39,16 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
   rh.NASAAPODRequest((apod) => {
     imgurl = apod.url;
     const isVideo = (apod) => {
-      (imgurl = apod.thumbnail_url); 
+      imgurl = apod.thumbnail_url;
       injection = `<h4>It's a video <a href=${apod.url}>go watch it.<a/><h4/>`;
-    }
-    typeof apod.thumbnail_url == "undefined" ? (imgurl = apod.url) : isVideo(apod);
+    };
+    typeof apod.thumbnail_url == "undefined"
+      ? (imgurl = apod.url)
+      : isVideo(apod);
     title = apod.title;
-    const apoddate = `${apod.date.split("-")[0].split("").slice(2).join("")}${apod.date.split("-")[1]}${apod.date.split("-")[2]}`;
+    const apoddate = `${apod.date.split("-")[0].split("").slice(2).join("")}${
+      apod.date.split("-")[1]
+    }${apod.date.split("-")[2]}`;
     permalink = `https://apod.nasa.gov/apod/ap${apoddate}.html`;
   });
 
@@ -61,7 +65,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       return 0;
     });
     //filter data
-    var htmlString;
+    var Top3AndLatest5 = "";
     var total_plays = 0;
     var duration = 0;
     var totalPlayTime = 0;
@@ -77,12 +81,21 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       total_plays = total_plays + item.total_plays;
       duration = duration + item.duration;
       totalPlayTime = totalPlayTime + item.duration * item.total_plays;
+      if (!extraordinaryBit) {
+        var cleanArtist = TextCleaner(item.title.split(`(`)[1])
+          .remove(`)`)
+          .trim()
+          .valueOf();
+        if (item.artist != cleanArtist) {
+          rh.buzzsprout.write(item.id, { artist: cleanArtist });
+        }
+      }
     });
 
     //first 3 highest episodes
-    var htmlString = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[0].id}">${BuzzsproutResponse[0].title}</a> which has ${BuzzsproutResponse[0].total_plays} downloads </h2>`;
-    htmlString += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[1].id}">${BuzzsproutResponse[1].title}</a> which has ${BuzzsproutResponse[1].total_plays} downloads </h3>`;
-    htmlString += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[2].id}">${BuzzsproutResponse[2].title}</a> which has ${BuzzsproutResponse[2].total_plays} downloads </h4>`;
+    Top3AndLatest5 = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[0].id}">${BuzzsproutResponse[0].title}</a> which has ${BuzzsproutResponse[0].total_plays} downloads </h2>`;
+    Top3AndLatest5 += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[1].id}">${BuzzsproutResponse[1].title}</a> which has ${BuzzsproutResponse[1].total_plays} downloads </h3>`;
+    Top3AndLatest5 += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[2].id}">${BuzzsproutResponse[2].title}</a> which has ${BuzzsproutResponse[2].total_plays} downloads </h4>`;
 
     //sort authors according to highest value
     authors.sort((a, b) => {
@@ -106,13 +119,13 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         return 0;
       }
     });
-    htmlString += `<h1>Latest 5</h1>`;
+    Top3AndLatest5 += `<h1>Latest 5</h1>`;
     // latest 5
     var tply = 0;
     // total plays for latest 5 & tabulate the data
     for (var i = 0; i < 5; i++) {
       tply += BuzzsproutResponse[i].total_plays;
-      htmlString += `<h6>${
+      Top3AndLatest5 += `<h6>${
         i + 1
       }) Title:  <a href="https://www.buzzsprout.com/1173590/${
         BuzzsproutResponse[i].id
@@ -120,11 +133,11 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         BuzzsproutResponse[i].total_plays
       } downloads</h6><hr>`;
     }
-    htmlString += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(
+    Top3AndLatest5 += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(
       tply / 5
     )}</strong></h5>`;
     // garbage for the table
-    var preString = `<table><tr><td><h3>Artist</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td><td><h3>Avrage</h3></td><td style='padding:10px;' ><h3>Time</h3></td><td><h3>Play Time</h3></td></tr>`;
+    var TableOfAuthors = `<table><tr><td><h3>Artist</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td><td><h3>Avrage</h3></td><td style='padding:10px;' ><h3>Time</h3></td><td><h3>Play Time</h3></td></tr>`;
     var ExtraOrdinaryHtml;
     if (extraordinaryBit) {
       ExtraOrdinaryHtml = `<h1>Some Code-Breaking ExtraOrdinary Titles</h1>`;
@@ -133,36 +146,27 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         ExtraOrdinaryHtml = `${ExtraOrdinaryHtml} <h2>Title no ${id}, Title ${item.title} </h2>`;
       });
       longStringOfInformation += ExtraOrdinaryHtml;
-    } else {
-      BuzzsproutResponse.forEach((item, i) => {
-        var cleanArtist = TextCleaner(item.title.split(`(`)[1])
-          .remove(`)`)
-          .trim()
-          .valueOf();
-        if (item.artist != cleanArtist) {
-          rh.buzzsprout.write(
-            item.id,
-            { artist: cleanArtist }
-          );
-        }
-      });
     }
     authors.forEach((item, _i) => {
-      preString = `${preString} <tr><td style='padding:10px'>${
+      TableOfAuthors = `${TableOfAuthors} <tr><td style='padding:10px'>${
         item.author
       }</td><td>${item.downloads.toString()}</td><td style='padding:10px;'>${
         item.entries
       }</td><td>${Math.round(
         item.downloads / item.entries
-      )}</td><td>${rh.getFormattedTime(item.duration)}</td><td style='padding:10px;'>${rh.getFormattedTime(item.TPlayTime)}</td></tr>`;
+      )}</td><td>${rh.getFormattedTime(
+        item.duration
+      )}</td><td style='padding:10px;'>${rh.getFormattedTime(
+        item.TPlayTime
+      )}</td></tr>`;
     });
     var avgdown = Math.round(total_plays / BuzzsproutResponse.length);
-    preString = preString + `<table>`;
-    longStringOfInformation = `${longStringOfInformation} ${preString} </p><h3><strong>Total plays on all episodes ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(
+    TableOfAuthors = TableOfAuthors + `<table>`;
+    longStringOfInformation = `${longStringOfInformation} ${TableOfAuthors} </p><h3><strong>Total plays on all episodes ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(
       duration
     )}<br />Total play time on all episodes : ${rh.getFormattedTime(
       totalPlayTime
-    )} </strong></h3>${htmlString} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
+    )} </strong></h3>${Top3AndLatest5} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 });
@@ -218,13 +222,10 @@ app.post(`/find/and/replace/confirm`, (req, res) => {
         if (item.title.search(find) !== -1) {
           id = item.id;
           modtitle = `${item.title.split("(")[0]} ( ${replace} )`;
-          rh.buzzsprout.write(
-            id,
-            {
-              title: modtitle,
-              artist: `${replace}`
-            }
-          );
+          rh.buzzsprout.write(id, {
+            title: modtitle,
+            artist: `${replace}`
+          });
         }
       });
     });
