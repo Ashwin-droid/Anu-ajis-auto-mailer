@@ -75,7 +75,7 @@ module.exports = {
         });
     },
     write: (id, object) => {
-      if (process.env.WRITE_ACC === 1 && process.env.NODE_ENV === `production`) {
+      if (process.env.WRITE_ACC == 1 && process.env.NODE_ENV == `production`) {
         moduleInstanceOfAxios.put(
           `/1173590/episodes/` + id.toString() + `.json`,
           object,
