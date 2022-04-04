@@ -1,4 +1,4 @@
-const env = require(`dotenv`).config();
+require(`dotenv`).config();
 const axios = require(`axios`);
 const nodemailer = require(`nodemailer`);
 const { google } = require(`googleapis`);
@@ -54,7 +54,7 @@ module.exports = {
     sendEmail({
       from: process.env.EMAIL,
       to: process.env.TARGET_MAIL_ID,
-      subject: `Automatic Podcast Progress Update And A Quote From Ashwin's Code`,
+      subject: `Automatic Daily Mail From Ashwin's Code`,
       html: html
     });
   },
@@ -107,6 +107,37 @@ module.exports = {
       .catch((error) => {
         console.log(error);
       });
+  },
+  OnTodaysDay: (after) => {
+    var onTodaysDay = "";
+    var filteredarray = [];
+    var today = new Date();
+    // using date offset as heroku is hosted in usa
+    var dd = String(parseInt(String(today.getDate() + parseInt(process.env.DATE_OFFSET))));
+    var mm = String(parseInt(String(today.getMonth() + 1)));
+    request.get("https://history.muffinlabs.com/date/" + mm + "/" + dd, )
+    .then(response => {
+      response.data.data.Events.forEach((item, i) => {
+        if (!(item.html.toUpperCase().includes("WAR") ||
+            item.html.toUpperCase().includes("MURDER") ||
+            item.html.toUpperCase().includes("BATTLE") ||
+            item.html.toUpperCase().includes("ARMY") ||
+            item.html.toUpperCase().includes("REVOLT") ||
+            item.html.toUpperCase().includes("CAPTURE") ||
+            item.html.toUpperCase().includes("PRISON"))) {
+          filteredarray.push(item.html);
+        }
+      });
+      //check if filtered array is empty
+      if (filteredarray.length === 0) {
+        onTodaysDay = response.data.data.Events[Math.floor(Math.random() * filteredarray.length)].html;
+      } else {
+        onTodaysDay = filteredarray[Math.floor(Math.random() * filteredarray.length)];
+      }
+      after(onTodaysDay);
+    }).catch(error => {
+      console.log(error);
+    });
   },
   CheckForAuthors: (array, after) => {
     var authors = [];
