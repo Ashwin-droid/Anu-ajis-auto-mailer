@@ -114,34 +114,6 @@ module.exports = {
         console.log(error);
       });
   },
-  OnTodaysDay: (after) => {
-    var onTodaysDay = "";
-    var filteredarray = [];
-    var today = new Date();
-    const badWords = ["ACCUSATION","ACOLYTE","ALLEGATION","ALLIANCE","ANONYMITY","ASPIRATION","ASSAIL","AUTHORITARIAN","BAMBOOZLE","BELEAGUER","BENEFIT","BLAME","BRIBE","CADRE","CAREER","CHICANERY","CLAIM","COERCION","COLLABORATION","CONCEAL","CONFIDENCE","CONTROL","CORRUPTION","COTERIE","COVERT","DEBACLE","DECEPTION","DEFAMATION","DEFICIT","DEFLECT","DEMAGOGUE","DENIGRATE","DENY","DICTATORSHIP","EMBEZZLEMENT","EMPIRE","ENDORSEMENT","ENGAGEMENT","EXPOSE","EXTORTION","FEUD","FIASCO","FRAY","FUROR","GAIN","GREEDY","HYPOCRISY","IGNORANT","ILLEGAL","ILLICIT","IMPUNITY","INCIDENT","INFLUENCE","INFRINGEMENT","INTEGRITY","INTIMIDATION","IRRESPONSIBLE","LACONIC","LOBBY","MALFEASANCE","MANIPULATE","MASSIVE","MENDACITY","MERCURIAL","OBSCURE","ONEROUS","OPPORTUNIST","PARRY","PARTIAL","PATRIARCHY","PATRONAGE","PERSECUTION","PLAGIARISM","PLUTOCRACY","PRESTIDIGITATION","PRIVILEGE","PROXY","REBUT","RECKLESS","RECRIMINATION","REFUTE","REGIME","REPUTATION","RESIGNATION","RETALIATION","REVELATION","SAGA","SCANDAL","SCANDALOUS","SCAPEGOAT","SLOTH","SOLICIT","SUBTERFUGE","TAINTED","TARNISH","TEMPTATION","TYCOON","UNETHICAL","UNJUST","UNSAVORY","UNWILLING","VANDAL","VASSAL","VIGILANT","VITRIOLIC","VITUPERATE","VULGAR","WARRANT","WARRANTY","WICKED","WOE","WRESTLE","ZEAL","ZEALOUS","MURDER","WAR","BATTLE","ARMY","REVOLT","CAPTURE","PRISON"];
-    const badWordCheckerRegEx = new RegExp(badWords.join("|"), "i");
-    // using date offset as heroku is hosted in usa
-    var dd = String(parseInt(String(today.getDate() + parseInt(process.env.DATE_OFFSET))));
-    var mm = String(parseInt(String(today.getMonth() + 1)));
-    request.get("https://history.muffinlabs.com/date/" + mm + "/" + dd, )
-    .then(response => {
-      response.data.data.Events.forEach((item, i) => {
-        //see if the event has a bad word
-        if (!badWordCheckerRegEx.test(item.html)) {
-          filteredarray.push(item.html);
-        }
-      });
-      //check if filtered array is empty
-      if (filteredarray.length === 0) {
-        onTodaysDay = "Sadly there are no positive Events <br />" + response.data.data.Events[Math.floor(Math.random() * filteredarray.length)].html;
-      } else {
-        onTodaysDay = filteredarray[Math.floor(Math.random() * filteredarray.length)];
-      }
-      after(onTodaysDay);
-    }).catch(error => {
-      console.log(error);
-    });
-  },
   CheckForAuthors: (array, after) => {
     var authors = [];
     var extraordinarytitles = [];
