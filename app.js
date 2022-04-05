@@ -28,6 +28,8 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
   var permalink = "";
   var injection = "";
   var onTodaysDay = "";
+  var bingurl = "";
+  var bingtitle = "";
 
   //load all data
   rh.buzzsprout.read((bd) => {
@@ -52,14 +54,18 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
         permalink = `https://apod.nasa.gov/apod/ap${apoddate}.html`;
         rh.OnTodaysDay((otd) => {
           onTodaysDay = otd;
-          postfech();
+          rh.bingImageOfTheDay((btd) => {
+            bingurl = btd.url;
+            bingtitle = btd.title;
+            postfech();
+          });
         });
       });
     });
   });
 
   function postfech() {
-    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>On todays day</h2><strong><h4>${onTodaysDay}</h4></strong><h2>NASA Image of the day</h2><a href="${permalink}"><h3>${title}</h3></a><img src="${imgurl}" alt="${title}" /><br />${injection}<h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${BuzzsproutResponse.length} </h4> <p>`;
+    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>On todays day</h2><strong><h4>${onTodaysDay}</h4></strong><h2>NASA Image of the day</h2><a href="${permalink}"><h3>${title}</h3></a><img src="${imgurl}" alt="${title}" /><br /><h2>Image of the day</h2><h3>${bingtitle}</h3><img src="${bingurl}" alt="${bingtitle}" /><br />${injection}<h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${BuzzsproutResponse.length} </h4> <p>`;
     // sort data based on highest value
     BuzzsproutResponse.sort((a, b) => {
       if (a.total_plays > b.total_plays) {
@@ -88,10 +94,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       duration = duration + item.duration;
       totalPlayTime = totalPlayTime + item.duration * item.total_plays;
       if (!extraordinaryBit) {
-        var cleanArtist = TextCleaner(item.title.split(`(`)[1])
-          .remove(`)`)
-          .trim()
-          .valueOf();
+        var cleanArtist = TextCleaner(item.title.split(`(`)[1].split(`)`)[0]).trim().valueOf()
         if (item.artist != cleanArtist) {
           rh.buzzsprout.write(item.id, { artist: cleanArtist });
         }

@@ -97,7 +97,13 @@ module.exports = {
     .then((response) => {
       after(response.data);
       })
-    },
+  },
+  bingImageOfTheDay: (after) => {
+    request.get(`https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US`)
+    .then((response) => {
+      after({"url": `https://www.bing.com${response.data.images[0].url}`,"title": response.data.images[0].title});
+      })
+  },
   QuoteRequest: (after) => {
     request
       .get(`https://zenquotes.io/api/random`)
@@ -113,7 +119,7 @@ module.exports = {
     var filteredarray = [];
     var today = new Date();
     const badWords = ["ACCUSATION","ACOLYTE","ALLEGATION","ALLIANCE","ANONYMITY","ASPIRATION","ASSAIL","AUTHORITARIAN","BAMBOOZLE","BELEAGUER","BENEFIT","BLAME","BRIBE","CADRE","CAREER","CHICANERY","CLAIM","COERCION","COLLABORATION","CONCEAL","CONFIDENCE","CONTROL","CORRUPTION","COTERIE","COVERT","DEBACLE","DECEPTION","DEFAMATION","DEFICIT","DEFLECT","DEMAGOGUE","DENIGRATE","DENY","DICTATORSHIP","EMBEZZLEMENT","EMPIRE","ENDORSEMENT","ENGAGEMENT","EXPOSE","EXTORTION","FEUD","FIASCO","FRAY","FUROR","GAIN","GREEDY","HYPOCRISY","IGNORANT","ILLEGAL","ILLICIT","IMPUNITY","INCIDENT","INFLUENCE","INFRINGEMENT","INTEGRITY","INTIMIDATION","IRRESPONSIBLE","LACONIC","LOBBY","MALFEASANCE","MANIPULATE","MASSIVE","MENDACITY","MERCURIAL","OBSCURE","ONEROUS","OPPORTUNIST","PARRY","PARTIAL","PATRIARCHY","PATRONAGE","PERSECUTION","PLAGIARISM","PLUTOCRACY","PRESTIDIGITATION","PRIVILEGE","PROXY","REBUT","RECKLESS","RECRIMINATION","REFUTE","REGIME","REPUTATION","RESIGNATION","RETALIATION","REVELATION","SAGA","SCANDAL","SCANDALOUS","SCAPEGOAT","SLOTH","SOLICIT","SUBTERFUGE","TAINTED","TARNISH","TEMPTATION","TYCOON","UNETHICAL","UNJUST","UNSAVORY","UNWILLING","VANDAL","VASSAL","VIGILANT","VITRIOLIC","VITUPERATE","VULGAR","WARRANT","WARRANTY","WICKED","WOE","WRESTLE","ZEAL","ZEALOUS","MURDER","WAR","BATTLE","ARMY","REVOLT","CAPTURE","PRISON"];
-    const badWordCheckerRegEx = new RegExp(badWords.join("|"), "gi");
+    const badWordCheckerRegEx = new RegExp(badWords.join("|"), "i");
     // using date offset as heroku is hosted in usa
     var dd = String(parseInt(String(today.getDate() + parseInt(process.env.DATE_OFFSET))));
     var mm = String(parseInt(String(today.getMonth() + 1)));
@@ -127,7 +133,7 @@ module.exports = {
       });
       //check if filtered array is empty
       if (filteredarray.length === 0) {
-        onTodaysDay = "no positive events"//response.data.data.Events[Math.floor(Math.random() * filteredarray.length)].html;
+        onTodaysDay = "Sadly there are no positive Events <br />" + response.data.data.Events[Math.floor(Math.random() * filteredarray.length)].html;
       } else {
         onTodaysDay = filteredarray[Math.floor(Math.random() * filteredarray.length)];
       }
@@ -148,10 +154,7 @@ module.exports = {
         });
         extraordinaryBit = true;
       } else {
-        var author1 = TextCleaner(item.title.split(`(`)[1])
-          .remove(`)`)
-          .trim()
-          .valueOf();
+        var author1 = TextCleaner(item.title.split(`(`)[1].split(`)`)[0]).trim().valueOf()
         if (author1 == ``) {
           extraordinarytitles.push({
             title: item.title,
@@ -253,8 +256,12 @@ module.exports = {
       }
     }
   },
-  awardCeremony: (sortedBuzzsproutData, authorsArrayOutput) => {
+  award: (sortedBuzzsproutData, authorsArrayOutput) => {
     var awardCeremony = "";
-
+    //longest title
+    var longestTitle = sortedBuzzsproutData.reduce((a, b) => {return a.length > b.length ? a : b;}
+  );
+    //get the artist of the longest title
+    var longestTitleArtist = TextCleaner(longestTitle.split(`(`)[1].split(`)`)[0]).trim().valueOf(); //1
   }
 };
