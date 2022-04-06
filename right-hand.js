@@ -265,7 +265,14 @@ module.exports = {
         tempAwardString += `<h4>🏅 The ${award} Award is Earned By ${artistName}</h4>`;
       });
     });
-    awardsString = `<h3>🏅${highestAwards}/8 Awards are Earned By ${highestAwardsArtist} Congratulations!</h3>${tempAwardString}`;
+    // check if a two or more artists have the same number of awards
+    artistArray.forEach((artist) => {
+      if(artist.NoOfAwards == highestAwards && highestAwardsArtist != artist.artist){
+        awardsString = `<h3>🏅It Is A Tie Between ${highestAwardsArtist} And ${artist.artist} Each Getting a total of ${highestAwards}/8 Awards Congratulations!</h3>${tempAwardString}`;;
+      } else {
+        awardsString = `<h3>🏅${highestAwards}/8 Awards are Earned By ${highestAwardsArtist} Congratulations!</h3>${tempAwardString}`;
+      }
+    });
     return awardsString;
   },
   FindAKeyInAnArrayOfObjects: (array, key, value, after) => {
