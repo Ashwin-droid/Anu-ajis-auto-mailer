@@ -23,11 +23,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
   var quote = "";
   var extraordinaryBit = false;
   var extraordinarytitles = [];
-  var imgurl = "";
-  var title = "";
-  var permalink = "";
   var injection = "";
-  var onTodaysDay = "";
   var bingurl = "";
   var bingtitle = "";
 
@@ -36,34 +32,16 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     BuzzsproutResponse = bd;
     rh.QuoteRequest((qt) => {
       quote = qt;
-      rh.NASAAPODRequest((apod) => {
-        imgurl = apod.url;
-        const isVideo = (apod) => {
-          imgurl = apod.thumbnail_url;
-          injection = `<h4>It's a video <a href=${apod.url}>go watch it.<a/><h4/>`;
-        };
-        typeof apod.thumbnail_url == "undefined"
-          ? (imgurl = apod.url)
-          : isVideo(apod);
-        title = apod.title;
-        const apoddate = `${apod.date
-          .split("-")[0]
-          .split("")
-          .slice(2)
-          .join("")}${apod.date.split("-")[1]}${apod.date.split("-")[2]}`;
-        permalink = `https://apod.nasa.gov/apod/ap${apoddate}.html`;
-
-        rh.bingImageOfTheDay((btd) => {
-          bingurl = btd.url;
-          bingtitle = btd.title;
-          postfech();
-        });
+      rh.bingImageOfTheDay((btd) => {
+        bingurl = btd.url;
+        bingtitle = btd.title;
+        postfech();
       });
     });
   });
 
   function postfech() {
-    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>NASA Image of the day</h2><a href="${permalink}"><h3>${title}</h3></a><img src="${imgurl}" alt="${title}" /><br /><h2>Image of the day</h2><h3>${bingtitle}</h3><img src="${bingurl}" alt="${bingtitle}" /><br />${injection}<h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${BuzzsproutResponse.length} </h4> <p>`;
+    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>Image of the day</h2><h3>${bingtitle}</h3><img src="${bingurl}" alt="${bingtitle}" /><br />${injection}<h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${BuzzsproutResponse.length} </h4> <p>`;
     // sort data based on highest value
     BuzzsproutResponse.sort((a, b) => {
       if (a.total_plays > b.total_plays) {
@@ -175,7 +153,10 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       duration
     )}<br />Total play time on all episodes : ${rh.getFormattedTime(
       totalPlayTime
-    )} </strong></h3>${Top3AndLatest5} ${rh.award(BuzzsproutResponse, artists)}<a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
+    )} </strong></h3>${Top3AndLatest5} ${rh.award(
+      BuzzsproutResponse,
+      artists
+    )}<a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 });

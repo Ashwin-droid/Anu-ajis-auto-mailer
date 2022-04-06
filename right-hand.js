@@ -97,15 +97,6 @@ module.exports = {
       }
     }
   },
-  NASAAPODRequest: (after) => {
-    request
-      .get(
-        `https://api.nasa.gov/planetary/apod?api_key=${process.env.NASA_API_KEY}&thumbs=true`
-      )
-      .then((response) => {
-        after(response.data);
-      });
-  },
   bingImageOfTheDay: (after) => {
     request
       .get(
