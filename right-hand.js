@@ -88,7 +88,7 @@ module.exports = {
         );
       } else {
         console.log(`Sadly write is access denied`);
-        console.log(`But if i was granted write access, i would have written:\n${object.toString()}`);
+        console.log(`But if i was granted write access, i would have written:\n${JSON.stringify(object)}`);
       }
     }
   },
