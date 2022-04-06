@@ -4,6 +4,7 @@ const nodemailer = require(`nodemailer`);
 const { google } = require(`googleapis`);
 const OAuth2 = google.auth.OAuth2;
 const TextCleaner = require(`text-cleaner`);
+const { Configuration, OpenAIApi } = require("openai");
 const moduleInstanceOfAxios = axios.create({
   baseURL: `https://www.buzzsprout.com/api`
 });
@@ -88,21 +89,34 @@ module.exports = {
         );
       } else {
         console.log(`Sadly write is access denied`);
-        console.log(`But if i was granted write access, i would have written:\n${JSON.stringify(object)}`);
+        console.log(
+          `But if i was granted write access, i would have written:\n${JSON.stringify(
+            object
+          )}`
+        );
       }
     }
   },
-  NASAAPODRequest : (after) => {
-    request.get(`https://api.nasa.gov/planetary/apod?api_key=${process.env.NASA_API_KEY}&thumbs=true`)
-    .then((response) => {
-      after(response.data);
-      })
+  NASAAPODRequest: (after) => {
+    request
+      .get(
+        `https://api.nasa.gov/planetary/apod?api_key=${process.env.NASA_API_KEY}&thumbs=true`
+      )
+      .then((response) => {
+        after(response.data);
+      });
   },
   bingImageOfTheDay: (after) => {
-    request.get(`https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US`)
-    .then((response) => {
-      after({"url": `https://www.bing.com${response.data.images[0].url}`,"title": response.data.images[0].title});
-      })
+    request
+      .get(
+        `https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US`
+      )
+      .then((response) => {
+        after({
+          url: `https://www.bing.com${response.data.images[0].url}`,
+          title: response.data.images[0].title
+        });
+      });
   },
   QuoteRequest: (after) => {
     request
@@ -126,7 +140,9 @@ module.exports = {
         });
         extraordinaryBit = true;
       } else {
-        var author1 = TextCleaner(item.title.split(`(`)[1].split(`)`)[0]).trim().valueOf()
+        var author1 = TextCleaner(item.title.split(`(`)[1].split(`)`)[0])
+          .trim()
+          .valueOf();
         if (author1 == ``) {
           extraordinarytitles.push({
             title: item.title,
@@ -144,14 +160,21 @@ module.exports = {
             TPlayTime: item.duration * item.total_plays
           });
         } else {
-          module.exports.FindAKeyInAnArrayOfObjects(authors, `author`, author1, (array, indexes) => {
-            indexes.forEach((Index) => {
-              array[Index].downloads = authors[Index].downloads + item.total_plays;
-              array[Index].entries = authors[Index].entries + 1;
-              array[Index].duration = authors[Index].duration + item.duration;
-              array[Index].TPlayTime = authors[Index].TPlayTime + (item.duration * item.total_plays);
-            });
-          });
+          module.exports.FindAKeyInAnArrayOfObjects(
+            authors,
+            `author`,
+            author1,
+            (array, indexes) => {
+              indexes.forEach((Index) => {
+                array[Index].downloads =
+                  authors[Index].downloads + item.total_plays;
+                array[Index].entries = authors[Index].entries + 1;
+                array[Index].duration = authors[Index].duration + item.duration;
+                array[Index].TPlayTime =
+                  authors[Index].TPlayTime + item.duration * item.total_plays;
+              });
+            }
+          );
         }
       }
     });
@@ -189,7 +212,7 @@ module.exports = {
     } else {
       formattedTime += `0${days}d:`;
     }
-    if (hours >= 10){
+    if (hours >= 10) {
       formattedTime += `${hours}h:`;
     } else {
       formattedTime += `0${hours}h:`;
@@ -199,15 +222,15 @@ module.exports = {
     } else {
       formattedTime += `0${minutes}m:`;
     }
-    if (seconds >= 10){
+    if (seconds >= 10) {
       formattedTime += `${seconds}s`;
     } else {
       formattedTime += `0${seconds}s`;
     }
     var fta = formattedTime.split(`:`);
     var fta2 = formattedTime.split(`:`);
-    for(const item of fta) {
-      if (item == `00mo` || item == `00d` || item == `00h` || item == `00m`){
+    for (const item of fta) {
+      if (item == `00mo` || item == `00d` || item == `00h` || item == `00m`) {
         fta2.splice(fta2.indexOf(item), 1);
       } else {
         formattedTime = ``;
@@ -222,14 +245,79 @@ module.exports = {
   award: (sortedBuzzsproutData, authorsArrayOutput) => {
     var awardsString = "";
     var awards = [
-      {[`<a href="https://www.buzzsprout.com/1173590/${sortedBuzzsproutData.reduce((a, b) => {return a.length > b.length ? a : b;}).id}">Longest Title</a>`]: TextCleaner(sortedBuzzsproutData.reduce((a, b) => {return a.length > b.length ? a : b;}).title.split(`(`)[1].split(`)`)[0]).trim().valueOf()}, //longest title artist
-      {[`<a href="https://www.buzzsprout.com/1173590/${sortedBuzzsproutData.reduce((a, b) => {return a.duration > b.duration ? a : b;}).id}">Longest Episode</a>`]: TextCleaner(sortedBuzzsproutData.reduce((a, b) => {return a.duration > b.duration ? a : b;}).title.split(`(`)[1].split(`)`)[0]).trim().valueOf()}, //longest episode artist
-      {"Highest Performing Artist": authorsArrayOutput.reduce((a, b) => {return a.downloads > b.downloads ? a : b;}).author}, //highest performing artist
-      {"Longest Playtime" : authorsArrayOutput.reduce((a, b) => {return a.TPlayTime > b.TPlayTime ? a : b;}).author}, //longest playtime artist
-      {[`<a href="https://www.buzzsprout.com/1173590/${sortedBuzzsproutData.reduce((a, b) => {return a.total_plays > b.total_plays ? a : b;}).id}">Highest Performing Episode's Artist</a>`] : TextCleaner(sortedBuzzsproutData.reduce((a, b) => {return a.total_plays > b.total_plays ? a : b;}).title.split(`(`)[1].split(`)`)[0]).trim().valueOf()}, //highest performing episode artist
-      {"Highest No. Of Episodes" : authorsArrayOutput.reduce((a, b) => {return a.entries > b.entries ? a : b;}).author}, //highest number of episodes artist
-      {"Longest Total Story Time" : authorsArrayOutput.reduce((a, b) => {return a.duration > b.duration ? a : b;}).author}, //longest story time artist (in seconds)
-      {"Highest Avrage Download Count" : authorsArrayOutput.reduce((a, b) => {return a.downloads / a.entries > b.downloads / b.entries ? a : b;}).author} //highest avrage download count by artist
+      {
+        [`<a href="https://www.buzzsprout.com/1173590/${
+          sortedBuzzsproutData.reduce((a, b) => {
+            return a.length > b.length ? a : b;
+          }).id
+        }">Longest Title</a>`]: TextCleaner(
+          sortedBuzzsproutData
+            .reduce((a, b) => {
+              return a.length > b.length ? a : b;
+            })
+            .title.split(`(`)[1]
+            .split(`)`)[0]
+        )
+          .trim()
+          .valueOf()
+      }, //longest title artist
+      {
+        [`<a href="https://www.buzzsprout.com/1173590/${
+          sortedBuzzsproutData.reduce((a, b) => {
+            return a.duration > b.duration ? a : b;
+          }).id
+        }">Longest Episode</a>`]: TextCleaner(
+          sortedBuzzsproutData
+            .reduce((a, b) => {
+              return a.duration > b.duration ? a : b;
+            })
+            .title.split(`(`)[1]
+            .split(`)`)[0]
+        )
+          .trim()
+          .valueOf()
+      }, //longest episode artist
+      {
+        "Highest Performing Artist": authorsArrayOutput.reduce((a, b) => {
+          return a.downloads > b.downloads ? a : b;
+        }).author
+      }, //highest performing artist
+      {
+        "Longest Playtime": authorsArrayOutput.reduce((a, b) => {
+          return a.TPlayTime > b.TPlayTime ? a : b;
+        }).author
+      }, //longest playtime artist
+      {
+        [`<a href="https://www.buzzsprout.com/1173590/${
+          sortedBuzzsproutData.reduce((a, b) => {
+            return a.total_plays > b.total_plays ? a : b;
+          }).id
+        }">Highest Performing Episode's Artist</a>`]: TextCleaner(
+          sortedBuzzsproutData
+            .reduce((a, b) => {
+              return a.total_plays > b.total_plays ? a : b;
+            })
+            .title.split(`(`)[1]
+            .split(`)`)[0]
+        )
+          .trim()
+          .valueOf()
+      }, //highest performing episode artist
+      {
+        "Highest No. Of Episodes": authorsArrayOutput.reduce((a, b) => {
+          return a.entries > b.entries ? a : b;
+        }).author
+      }, //highest number of episodes artist
+      {
+        "Longest Total Story Time": authorsArrayOutput.reduce((a, b) => {
+          return a.duration > b.duration ? a : b;
+        }).author
+      }, //longest story time artist (in seconds)
+      {
+        "Highest Avrage Download Count": authorsArrayOutput.reduce((a, b) => {
+          return a.downloads / a.entries > b.downloads / b.entries ? a : b;
+        }).author
+      } //highest avrage download count by artist
     ];
     // an array for artists
     var artistArray = [];
@@ -237,15 +325,23 @@ module.exports = {
     awards.forEach((award) => {
       var key = Object.entries(award)[0][0];
       var value = Object.entries(award)[0][1];
-      if(typeof artistArray.find(({ artist: artist }) => artist == value) == `undefined`){
-        artistArray.push({"artist": value, "awards": [key], "NoOfAwards": 1});
+      if (
+        typeof artistArray.find(({ artist: artist }) => artist == value) ==
+        `undefined`
+      ) {
+        artistArray.push({ artist: value, awards: [key], NoOfAwards: 1 });
       } else {
-        module.exports.FindAKeyInAnArrayOfObjects(artistArray, `artist`, value, (_array, indexes) => {
-          indexes.forEach((Index) => {
-            artistArray[Index].awards.push(key);
-            artistArray[Index].NoOfAwards = artistArray[Index].NoOfAwards + 1;
-          });
-        });
+        module.exports.FindAKeyInAnArrayOfObjects(
+          artistArray,
+          `artist`,
+          value,
+          (_array, indexes) => {
+            indexes.forEach((Index) => {
+              artistArray[Index].awards.push(key);
+              artistArray[Index].NoOfAwards = artistArray[Index].NoOfAwards + 1;
+            });
+          }
+        );
       }
     });
     var highestAwards = 0;
@@ -256,7 +352,7 @@ module.exports = {
       var artistName = artist.artist;
       var artistAwards = artist.awards;
       var artistNoOfAwards = artist.NoOfAwards;
-      if(artistNoOfAwards > highestAwards){
+      if (artistNoOfAwards > highestAwards) {
         highestAwards = artistNoOfAwards;
         highestAwardsArtist = artistName;
       }
@@ -267,8 +363,11 @@ module.exports = {
     });
     // check if a two or more artists have the same number of awards
     artistArray.forEach((artist) => {
-      if(artist.NoOfAwards == highestAwards && highestAwardsArtist != artist.artist){
-        awardsString = `<h3>🏅It Is A Tie Between ${highestAwardsArtist} And ${artist.artist} Each Getting a total of ${highestAwards}/8 Awards Congratulations!</h3>${tempAwardString}`;;
+      if (
+        artist.NoOfAwards == highestAwards &&
+        highestAwardsArtist != artist.artist
+      ) {
+        awardsString = `<h3>🏅It Is A Tie Between ${highestAwardsArtist} And ${artist.artist} Each Getting a total of ${highestAwards}/8 Awards Congratulations!</h3>${tempAwardString}`;
       } else {
         awardsString = `<h3>🏅${highestAwards}/8 Awards are Earned By ${highestAwardsArtist} Congratulations!</h3>${tempAwardString}`;
       }
@@ -283,5 +382,76 @@ module.exports = {
       }
     });
     after(array, indexes);
+  },
+  AITitleSuggester: (prompt, after) => {
+    const configuration = new Configuration({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+    const openai = new OpenAIApi(configuration);
+
+    openai
+      .createCompletion("text-davinci-002", {
+        prompt: prompt,
+        temperature: 0.9,
+        max_tokens: 1000,
+        top_p: 1,
+        frequency_penalty: 1.9,
+        presence_penalty: 1.6,
+        best_of: 20,
+        stop: ["\"\"\"", "\n"]
+      })
+      .then((response) => {
+        after(response.data.choices[0].text);
+      }).catch((error) => {
+        console.log(error);
+      });
+  },
+  AIPrompter: (sortedBuzzsproutData) => {
+    //filter data
+    var currentarray = sortedBuzzsproutData;
+    currentarray.sort((a, b) => {
+      if (a.total_plays > b.total_plays) {
+        return -1;
+      }
+      if (a.total_plays < b.total_plays) {
+        return 1;
+      }
+      return 0;
+    });
+    //regexps
+    const filter1 = /[^a-zA-Z0-9]/g;
+    const substutute = /\s{2,}/g;
+    sortedBuzzsproutData.forEach((item, i) => {
+      if (filter1.test(item.title) == true) {
+        currentarray.splice(i, 1);
+      }
+      currentarray[i].title = currentarray[i].title.replace(substutute, ` `);
+    });
+    var prompt = `या क्रमाने एक आकर्षक आणि अर्थपूर्ण शीर्षक तयार करा\n`;
+    for (var i = 0; i <= 15; i++) {
+      prompt += `${currentarray[i].title.split(`(`)[0]}\n`;
+      currentarray.splice(i, 1);
+    }
+    currentarray.sort((a, b) => {
+      var d1 = new Date(a.published_at);
+      var d2 = new Date(b.published_at);
+      if (d1 > d2) {
+        return -1;
+      } else if (d1 < d2) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    for (var i = 0; i <= 10; i++) {
+      prompt += `${currentarray[i].title.split(`(`)[0]}\n`;
+      currentarray.splice(i, 1);
+    }
+    for(var i = 0; i <= 20; i++){
+      var random = Math.floor(Math.random() * currentarray.length) - 1;
+      prompt += `${currentarray[random].title.split(`(`)[0]}\n`;
+      currentarray.splice(i, 1);
+    }
+    return prompt;
   }
 };
