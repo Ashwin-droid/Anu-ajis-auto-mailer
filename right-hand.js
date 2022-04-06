@@ -114,7 +114,7 @@ module.exports = {
         console.log(error);
       });
   },
-  CheckForAuthors: (array, after) => {
+  CheckForArtist: (array, after) => {
     var authors = [];
     var extraordinarytitles = [];
     var extraordinaryBit = false;
@@ -144,16 +144,7 @@ module.exports = {
             TPlayTime: item.duration * item.total_plays
           });
         } else {
-          function bodge(array, key, value, after) {
-            var indexes = [];
-            array.forEach((item, i) => {
-              if (item[key] == value) {
-                indexes.push(i);
-              }
-            });
-            after(array, indexes);
-          }
-          bodge(authors, `author`, author1, (array, indexes) => {
+          module.exports.FindAKeyInAnArrayOfObjects(authors, `author`, author1, (array, indexes) => {
             indexes.forEach((Index) => {
               array[Index].downloads = authors[Index].downloads + item.total_plays;
               array[Index].entries = authors[Index].entries + 1;
@@ -229,11 +220,61 @@ module.exports = {
     }
   },
   award: (sortedBuzzsproutData, authorsArrayOutput) => {
-    var awardCeremony = "";
-    //longest title
-    var longestTitle = sortedBuzzsproutData.reduce((a, b) => {return a.length > b.length ? a : b;}
-  );
-    //get the artist of the longest title
-    var longestTitleArtist = TextCleaner(longestTitle.split(`(`)[1].split(`)`)[0]).trim().valueOf(); //1
+    var awardsString = "";
+    var awards = [
+      {[`<a href="https://www.buzzsprout.com/1173590/${sortedBuzzsproutData.reduce((a, b) => {return a.length > b.length ? a : b;}).id}">Longest Title</a>`]: TextCleaner(sortedBuzzsproutData.reduce((a, b) => {return a.length > b.length ? a : b;}).title.split(`(`)[1].split(`)`)[0]).trim().valueOf()}, //longest title artist
+      {[`<a href="https://www.buzzsprout.com/1173590/${sortedBuzzsproutData.reduce((a, b) => {return a.duration > b.duration ? a : b;}).id}">Longest Episode</a>`]: TextCleaner(sortedBuzzsproutData.reduce((a, b) => {return a.duration > b.duration ? a : b;}).title.split(`(`)[1].split(`)`)[0]).trim().valueOf()}, //longest episode artist
+      {"Highest Performing Artist": authorsArrayOutput.reduce((a, b) => {return a.downloads > b.downloads ? a : b;}).author}, //highest performing artist
+      {"Longest Playtime" : authorsArrayOutput.reduce((a, b) => {return a.TPlayTime > b.TPlayTime ? a : b;}).author}, //longest playtime artist
+      {[`<a href="https://www.buzzsprout.com/1173590/${sortedBuzzsproutData.reduce((a, b) => {return a.total_plays > b.total_plays ? a : b;}).id}">Highest Performing Episode's Artist</a>`] : TextCleaner(sortedBuzzsproutData.reduce((a, b) => {return a.total_plays > b.total_plays ? a : b;}).title.split(`(`)[1].split(`)`)[0]).trim().valueOf()}, //highest performing episode artist
+      {"Highest No. Of Episodes" : authorsArrayOutput.reduce((a, b) => {return a.entries > b.entries ? a : b;}).author}, //highest number of episodes artist
+      {"Longest Total Story Time" : authorsArrayOutput.reduce((a, b) => {return a.duration > b.duration ? a : b;}).author}, //longest story time artist (in seconds)
+      {"Highest Avrage Download Count" : authorsArrayOutput.reduce((a, b) => {return a.downloads / a.entries > b.downloads / b.entries ? a : b;}).author} //highest avrage download count by artist
+    ];
+    // an array for artists
+    var artistArray = [];
+    // loop over awards
+    awards.forEach((award) => {
+      var key = Object.entries(award)[0][0];
+      var value = Object.entries(award)[0][1];
+      if(typeof artistArray.find(({ artist: artist }) => artist == value) == `undefined`){
+        artistArray.push({"artist": value, "awards": [key], "NoOfAwards": 1});
+      } else {
+        module.exports.FindAKeyInAnArrayOfObjects(artistArray, `artist`, value, (_array, indexes) => {
+          indexes.forEach((Index) => {
+            artistArray[Index].awards.push(key);
+            artistArray[Index].NoOfAwards = artistArray[Index].NoOfAwards + 1;
+          });
+        });
+      }
+    });
+    var highestAwards = 0;
+    var highestAwardsArtist = ``;
+    var tempAwardString = ``;
+    // loop over artists
+    artistArray.forEach((artist) => {
+      var artistName = artist.artist;
+      var artistAwards = artist.awards;
+      var artistNoOfAwards = artist.NoOfAwards;
+      if(artistNoOfAwards > highestAwards){
+        highestAwards = artistNoOfAwards;
+        highestAwardsArtist = artistName;
+      }
+      // loop over awards
+      artistAwards.forEach((award) => {
+        tempAwardString += `<h4>🏅 The ${award} Award is Earned By ${artistName}</h4>`;
+      });
+    });
+    awardsString = `<h3>🏅${highestAwards}/8 Awards are Earned By ${highestAwardsArtist} Congratulations!</h3>${tempAwardString}`;
+    return awardsString;
+  },
+  FindAKeyInAnArrayOfObjects: (array, key, value, after) => {
+    var indexes = [];
+    array.forEach((item, i) => {
+      if (item[key] == value) {
+        indexes.push(i);
+      }
+    });
+    after(array, indexes);
   }
 };

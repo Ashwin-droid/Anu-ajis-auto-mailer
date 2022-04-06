@@ -79,10 +79,10 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     var total_plays = 0;
     var duration = 0;
     var totalPlayTime = 0;
-    var authors = [];
+    var artists = [];
     // beating heart of the code,the compound illitrator
-    rh.CheckForAuthors(BuzzsproutResponse, (authorArray, extTitles, extbit) => {
-      authors = authorArray;
+    rh.CheckForArtist(BuzzsproutResponse, (authorArray, extTitles, extbit) => {
+      artists = authorArray;
       extraordinarytitles = extTitles;
       extraordinaryBit = extbit;
     });
@@ -107,7 +107,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     Top3AndLatest5 += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[2].id}">${BuzzsproutResponse[2].title}</a> which has ${BuzzsproutResponse[2].total_plays} downloads </h4>`;
 
     //sort authors according to highest value
-    authors.sort((a, b) => {
+    artists.sort((a, b) => {
       if (a.downloads > b.downloads) {
         return -1;
       }
@@ -156,7 +156,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       });
       longStringOfInformation += ExtraOrdinaryHtml;
     }
-    authors.forEach((item, _i) => {
+    artists.forEach((item, _i) => {
       TableOfAuthors = `${TableOfAuthors} <tr><td style='padding:10px'>${
         item.author
       }</td><td>${item.downloads.toString()}</td><td style='padding:10px;'>${
@@ -175,7 +175,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       duration
     )}<br />Total play time on all episodes : ${rh.getFormattedTime(
       totalPlayTime
-    )} </strong></h3>${Top3AndLatest5} <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
+    )} </strong></h3>${Top3AndLatest5} ${rh.award(BuzzsproutResponse, artists)}<a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 });
@@ -186,7 +186,7 @@ app.get(`/find/and/replace`, (req, res) => {
     var author = ``;
     rh.buzzsprout.read((data) => {
       // beating heart of the code,the compound illitrator
-      rh.CheckForAuthors(data, (authors, _ul, extbit) => {
+      rh.CheckForArtist(data, (authors, _ul, extbit) => {
         if (!extbit) {
           authors.forEach((item, i) => {
             author = item.author;
