@@ -4,7 +4,6 @@ const nodemailer = require(`nodemailer`);
 const { google } = require(`googleapis`);
 const OAuth2 = google.auth.OAuth2;
 const TextCleaner = require(`text-cleaner`);
-const { Configuration, OpenAIApi } = require("openai");
 const moduleInstanceOfAxios = axios.create({
   baseURL: `https://www.buzzsprout.com/api`
 });
@@ -103,9 +102,18 @@ module.exports = {
         `https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US`
       )
       .then((response) => {
-        after({
-          url: `https://www.bing.com${response.data.images[0].url}`,
-          title: response.data.images[0].title
+        request.get(response.data.images[0].copyrightlink)
+         .then((response) => {
+          const resdat = response.data.toString();
+          var unfinishedData = resdat.slice(
+            resdat.search(`ency_desc`) + 31
+          );
+          var data = unfinishedData.slice(0, unfinishedData.search(`</div>`));
+          after({
+            url: `https://www.bing.com${response.data.images[0].url}`,
+            title: response.data.images[0].title,
+            description: data
+          });
         });
       });
   },
@@ -373,5 +381,5 @@ module.exports = {
       }
     });
     after(array, indexes);
-  },
+  }
 };

@@ -23,9 +23,9 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
   var quote = "";
   var extraordinaryBit = false;
   var extraordinarytitles = [];
-  var injection = "";
   var bingurl = "";
   var bingtitle = "";
+  var bingdiscription = "";
 
   //load all data
   rh.buzzsprout.read((bd) => {
@@ -35,13 +35,14 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       rh.bingImageOfTheDay((btd) => {
         bingurl = btd.url;
         bingtitle = btd.title;
+        bingdiscription = btd.description;
         postfech();
       });
     });
   });
 
   function postfech() {
-    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>Image of the day</h2><h3>${bingtitle}</h3><img src="${bingurl}" alt="${bingtitle}" /><br />${injection}<h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${BuzzsproutResponse.length} </h4> <p>`;
+    var longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>Image of the day</h2><h3>${bingtitle}</h3><img src="${bingurl}" alt="${bingtitle}" /><br />${bingdiscription}<br /><h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats</h2><h4>Total entries ${BuzzsproutResponse.length} </h4> <p>`;
     // sort data based on highest value
     BuzzsproutResponse.sort((a, b) => {
       if (a.total_plays > b.total_plays) {
