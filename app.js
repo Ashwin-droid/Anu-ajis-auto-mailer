@@ -108,13 +108,14 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     var tply = 0;
     // total plays for latest 5 & tabulate the data
     for (var i = 0; i < 5; i++) {
-      tply += BuzzsproutResponse[Math.round(Math.random() * BuzzsproutResponse.length)].total_plays;
+      var rn = Math.round(Math.random() * BuzzsproutResponse.length)
+      tply += BuzzsproutResponse[Rn].total_plays;
       Top3AndLatest5 += `<h6>${
         i + 1
       }) Title:  <a href="https://www.buzzsprout.com/1173590/${
-        BuzzsproutResponse[Math.round(Math.random() * BuzzsproutResponse.length)].id
-      }">${BuzzsproutResponse[Math.round(Math.random() * BuzzsproutResponse.length)].title} </a>which has  ${
-        BuzzsproutResponse[Math.round(Math.random() * BuzzsproutResponse.length)].total_plays
+        BuzzsproutResponse[Rn].id
+      }">${BuzzsproutResponse[Rn].title} </a>which has  ${
+        BuzzsproutResponse[Rn].total_plays
       } downloads</h6><hr>`;
     }
     Top3AndLatest5 += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(
