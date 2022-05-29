@@ -83,6 +83,12 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     Top3AndLatest5 = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[0].id}">${BuzzsproutResponse[0].title}</a> which has ${BuzzsproutResponse[0].total_plays} downloads </h2>`;
     Top3AndLatest5 += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[1].id}">${BuzzsproutResponse[1].title}</a> which has ${BuzzsproutResponse[1].total_plays} downloads </h3>`;
     Top3AndLatest5 += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[2].id}">${BuzzsproutResponse[2].title}</a> which has ${BuzzsproutResponse[2].total_plays} downloads </h4>`;
+    Top3AndLatest5 += `<br/> <h5>Runner ups</h5> <br/>`
+
+    //Runner ups
+    Top3AndLatest5 += `<h6><a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[3].id}">${BuzzsproutResponse[3].title}</a> which has ${BuzzsproutResponse[3].total_plays} downloads </h6>`;
+    Top3AndLatest5 += `<h6><a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[4].id}">${BuzzsproutResponse[4].title}</a> which has ${BuzzsproutResponse[4].total_plays} downloads </h6>`;
+    Top3AndLatest5 += `<h6><a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[5].id}">${BuzzsproutResponse[5].title}</a> which has ${BuzzsproutResponse[5].total_plays} downloads </h6>`;
 
     //sort authors according to highest value
     artists.sort((a, b) => {
@@ -94,30 +100,21 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
       }
       return 0;
     });
-    // sort according to latest date
-    BuzzsproutResponse.sort((a, b) => {
-      var d1 = new Date(a.published_at);
-      var d2 = new Date(b.published_at);
-      if (d1 > d2) {
-        return -1;
-      } else if (d1 < d2) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
-    Top3AndLatest5 += `<h1>Latest 5</h1>`;
-    // latest 5
+
+    Top3AndLatest5 += `<h1>Featured 5</h1>`;
+
+    // featured 5
     var tply = 0;
     // total plays for latest 5 & tabulate the data
     for (var i = 0; i < 5; i++) {
-      tply += BuzzsproutResponse[i].total_plays;
+      var Rn = Math.round(Math.random() * BuzzsproutResponse.length)
+      tply += BuzzsproutResponse[Rn].total_plays;
       Top3AndLatest5 += `<h6>${
         i + 1
       }) Title:  <a href="https://www.buzzsprout.com/1173590/${
-        BuzzsproutResponse[i].id
-      }">${BuzzsproutResponse[i].title} </a>which has  ${
-        BuzzsproutResponse[i].total_plays
+        BuzzsproutResponse[Rn].id
+      }">${BuzzsproutResponse[Rn].title} </a>which has  ${
+        BuzzsproutResponse[Rn].total_plays
       } downloads</h6><hr>`;
     }
     Top3AndLatest5 += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(
