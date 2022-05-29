@@ -83,12 +83,12 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, (_req, res) => {
     Top3AndLatest5 = `<h2>🥇🏆🎉First, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[0].id}">${BuzzsproutResponse[0].title}</a> which has ${BuzzsproutResponse[0].total_plays} downloads </h2>`;
     Top3AndLatest5 += `<h3>🥈🏆🎉Second, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[1].id}">${BuzzsproutResponse[1].title}</a> which has ${BuzzsproutResponse[1].total_plays} downloads </h3>`;
     Top3AndLatest5 += `<h4>🥉🏆🎉Third, <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[2].id}">${BuzzsproutResponse[2].title}</a> which has ${BuzzsproutResponse[2].total_plays} downloads </h4>`;
-    Top3AndLatest5 += `<br/> <h5>Runner ups</h5> <br/>`
+    Top3AndLatest5 += `<br/> <h4>Runner ups</h4>`
 
     //Runner ups
-    Top3AndLatest5 += `<h6><a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[3].id}">${BuzzsproutResponse[3].title}</a> which has ${BuzzsproutResponse[3].total_plays} downloads </h6>`;
-    Top3AndLatest5 += `<h6><a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[4].id}">${BuzzsproutResponse[4].title}</a> which has ${BuzzsproutResponse[4].total_plays} downloads </h6>`;
-    Top3AndLatest5 += `<h6><a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[5].id}">${BuzzsproutResponse[5].title}</a> which has ${BuzzsproutResponse[5].total_plays} downloads </h6>`;
+    Top3AndLatest5 += `<h5><a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[3].id}">${BuzzsproutResponse[3].title}</a> which has ${BuzzsproutResponse[3].total_plays} downloads </h5>`;
+    Top3AndLatest5 += `<h5><a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[4].id}">${BuzzsproutResponse[4].title}</a> which has ${BuzzsproutResponse[4].total_plays} downloads </h5>`;
+    Top3AndLatest5 += `<h5><a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[5].id}">${BuzzsproutResponse[5].title}</a> which has ${BuzzsproutResponse[5].total_plays} downloads </h5>`;
 
     //sort authors according to highest value
     artists.sort((a, b) => {
