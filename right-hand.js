@@ -148,7 +148,8 @@ module.exports = {
             downloads: item.total_plays,
             entries: 1,
             duration: item.duration,
-            TPlayTime: item.duration * item.total_plays
+            TPlayTime: item.duration * item.total_plays,
+            titles: [item]
           });
         } else {
           module.exports.FindAKeyInAnArrayOfObjects(
@@ -163,6 +164,7 @@ module.exports = {
                 array[Index].duration = authors[Index].duration + item.duration;
                 array[Index].TPlayTime =
                   authors[Index].TPlayTime + item.duration * item.total_plays;
+                array[Index].titles.push(item);
               });
             }
           );
@@ -374,4 +376,18 @@ module.exports = {
     });
     after(array, indexes);
   },
+  removeByAttr: (arr, attr, value) => {
+    var i = arr.length;
+    while (i--) {
+      if (
+        arr[i] &&
+        arr[i].hasOwnProperty(attr) &&
+        arguments.length > 2 &&
+        arr[i][attr] === value
+      ) {
+        arr.splice(i, 1);
+      }
+    }
+    return arr;
+  }
 };
