@@ -45,5 +45,14 @@ module.exports = {
     } catch (err) {
       console.log(err);
     }
+  },
+  drop: async () => {
+    try {
+      const client = await pool.connect();
+      await client.query(`TRUNCATE TABLE IDS`);
+      client.release();
+    } catch (err) {
+      console.log(err);
+    }
   }
 };

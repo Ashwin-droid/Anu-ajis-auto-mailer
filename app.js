@@ -9,7 +9,6 @@ const app = express();
 app.use(cookieParser());
 
 //body
-// test verification
 
 var port = process.env.PORT || 3000;
 var longStringOfInformation;
