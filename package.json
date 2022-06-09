@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/Ashwin-droid/Anu-ajis-auto-mailer#readme",
   "dependencies": {
-    "axios": "^0.26.1",
+    "axios": "^0.27.2",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.1",
     "express": "^4.17.3",
