@@ -4,7 +4,6 @@ const nodemailer = require(`nodemailer`);
 const { google } = require(`googleapis`);
 const OAuth2 = google.auth.OAuth2;
 const TextCleaner = require(`text-cleaner`);
-const { Configuration, OpenAIApi } = require("openai");
 const moduleInstanceOfAxios = axios.create({
   baseURL: `https://www.buzzsprout.com/api`
 });
@@ -310,7 +309,10 @@ module.exports = {
         "Highest Avrage Download Count": authorsArrayOutput.reduce((a, b) => {
           return a.downloads / a.entries > b.downloads / b.entries ? a : b;
         }).author
-      } //highest avrage download count by artist
+      }, //highest avrage download count by artist
+      {
+        "Highest number of scientific stories": "डॅा. सौ. आरती जुवेकर."
+      }
     ];
     // an array for artists
     var artistArray = [];
