@@ -4,7 +4,6 @@ const express = require(`express`);
 const rh = require(`./right-hand.js`);
 const TextCleaner = require(`text-cleaner`);
 const cookieParser = require(`cookie-parser`);
-const db = require(`./db.js`);
 const app = express();
 app.use(cookieParser());
 
