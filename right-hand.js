@@ -364,7 +364,7 @@ module.exports = {
       ) {
         awardsString = `<h3>🏅It Is A Tie Between ${highestAwardsArtist} And ${artist.artist} Each Getting a total of ${highestAwards}/9 Awards Congratulations!</h3>${tempAwardString}`;
       } else {
-        awardsString = `<h3>🏅${highestAwards}/8 Awards are Earned By ${highestAwardsArtist} Congratulations!</h3>${tempAwardString}`;
+        awardsString = `<h3>🏅${highestAwards}/9 Awards are Earned By ${highestAwardsArtist} Congratulations!</h3>${tempAwardString}`;
       }
     });
     return awardsString;
