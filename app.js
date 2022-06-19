@@ -26,8 +26,6 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, async (_req, res) => {
   var injection = "";
   var bingurl = "";
   var bingtitle = "";
-  var sugestedEpisodeLink = "";
-  var existingIDS = await db.getall();
 
   //load all data
   rh.buzzsprout.read((bd) => {
