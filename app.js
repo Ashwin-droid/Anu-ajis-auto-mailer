@@ -38,17 +38,6 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, async (_req, res) => {
       rh.bingImageOfTheDay((btd) => {
         bingurl = btd.url;
         bingtitle = btd.title;
-        var randomSampleSpace = BuzzsproutResponse;
-
-        existingIDS.forEach((element) => {
-          // remove te element from the sample space which has the id
-          randomSampleSpace = rh.removeByAttr(randomSampleSpace, "id", element.id);
-        });
-
-        //get a random sample
-        var randomSample = randomSampleSpace[Math.floor(Math.random() * randomSampleSpace.length)]
-        sugestedEpisodeLink = `https://lifeofstories.buzzsprout.com/1173590/${randomSample.id}`;
-        db.add(randomSample.id);
         
         postfech();
         //check for saturday in india
@@ -198,7 +187,7 @@ app.get(`/autotrg/ifttt/auth/` + process.env.AUTH_KEY, async (_req, res) => {
     )} </strong></h3>${Top3AndLatest5} ${rh.award(
       BuzzsproutResponse,
       artists
-    )}<br/> <a href="${sugestedEpisodeLink}">Suggested link</a> <br/> <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology, Main Mail</p></body></html>`;
+    )} <br/> <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology, Main Mail</p></body></html>`;
     rh.email(longStringOfInformation);
   }
 
