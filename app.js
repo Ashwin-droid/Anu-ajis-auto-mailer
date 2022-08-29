@@ -146,4 +146,4 @@ async function main(){
     rh.email(longStringOfInformation);
   }
 }
-await main();
+main();
