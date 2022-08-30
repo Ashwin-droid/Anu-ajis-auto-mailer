@@ -1,3 +1,4 @@
+#!/bin/bash
 touch .env
 echo API_KEY=${{ secrets.API_KEY }} >> .env
 echo CLIENT_ID=${{ secrets.CLIENT_ID }} >> .env
