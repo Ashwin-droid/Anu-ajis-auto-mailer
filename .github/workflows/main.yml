@@ -8,6 +8,14 @@ on:
   #schedule:
   #  - cron:  '30 11 * * 0'
   
+env:
+  API_KEY: ${{ secrets.API_KEY }}
+  CLIENT_ID: ${{ secrets.CLIENT_ID }}
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  EMAIL: ${{ secrets.EMAIL }}
+  REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+  TARGET_MAIL_ID: ${{ secrets.TARGET_MAIL_ID }}
+  WRITE_ACC: ${{ secrets.WRITE_ACC }}
 
 jobs:
   Mail:
@@ -17,17 +25,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js
-      env:
-        API_KEY: ${{ secrets.API_KEY }}
-        CLIENT_ID: ${{ secrets.CLIENT_ID }}
-        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-        EMAIL: ${{ secrets.EMAIL }}
-        REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
-        TARGET_MAIL_ID: ${{ secrets.TARGET_MAIL_ID }}
-        WRITE_ACC: ${{ secrets.WRITE_ACC }}
       uses: actions/setup-node@v3
       with:
         node-version: 18
         cache: 'npm'
-    - run: npm i
-    - run: npm start
+    - name: npm install
+      run: npm install
+    - name: env builder
+      run: bash ./envbuilder.sh
+    - name: Run Mailer
+      run: npm start

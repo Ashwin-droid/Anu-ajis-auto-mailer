@@ -1,3 +1,2 @@
-node_modules/
 /.env
-swapfile.ipynb
+/node_modules
