@@ -4,10 +4,7 @@
   "description": "Anu Aji Automailer",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "deploy": "deploy.bat",
-    "amend": "deploy.bat -f --amend",
-    "dependency update": "npx npm-check -u -y && git add . && git commit -m \"dependency update\" && git push origin master"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",

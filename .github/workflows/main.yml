@@ -5,8 +5,8 @@ name: Auto Mailer
 
 on:
   workflow_dispatch:
-  #schedule:
-  #  - cron:  '30 11 * * 0'
+  schedule:
+    - cron:  '30 23 * * 6'
   
 env:
   API_KEY: ${{ secrets.API_KEY }}
