@@ -49,6 +49,7 @@ async function main(){
     var artists = [];
     // beating heart of the code,the compound illitrator
     rh.CheckForArtist(BuzzsproutResponse, (authorArray, extTitles, extbit) => {
+      console.log(JSON.stringify(authorArray))
       artists = authorArray;
       extraordinarytitles = extTitles;
       extraordinaryBit = extbit;
@@ -142,7 +143,7 @@ async function main(){
     )} </strong></h3>${Top3AndLatest5} ${rh.award(
       BuzzsproutResponse,
       artists
-    )} <br/> <a href="https://anu-aji-automailer.herokuapp.com/tools/validity"><p>Administration</p></a><p>Secured by Oauth Technology, Main Mail</p></body></html>`;
+    )}</body></html>`;
     rh.email(longStringOfInformation);
   }
 }

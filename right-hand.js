@@ -193,6 +193,11 @@ module.exports = {
         }
       }
     });
+    authors.forEach((item, i) => {
+      if (item.inactive){
+        item.titles = []
+      }
+    });
     after(authors, extraordinarytitles, extraordinaryBit);
   },
   getFormattedTime: (seconds) => {
