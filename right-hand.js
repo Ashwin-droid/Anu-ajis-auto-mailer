@@ -8,6 +8,7 @@ const moduleInstanceOfAxios = axios.create({
   baseURL: `https://www.buzzsprout.com/api`
 });
 const request = axios.create({});
+const InactivityTimer = 3888000000; //45 days
 
 module.exports = {
   email: (html) => {
@@ -142,13 +143,21 @@ module.exports = {
         } else if (
           typeof authors.find(({ author }) => author == author1) == `undefined`
         ) {
+          var inactive = true;
+          if (
+            Math.abs(new Date() - new Date(item.published_at)) < InactivityTimer
+          ) {
+            inactive = false;
+          }
           authors.push({
             author: author1,
             downloads: item.total_plays,
             entries: 1,
             duration: item.duration,
             TPlayTime: item.duration * item.total_plays,
-            titles: [item]
+            titles: [item],
+            mostRecentEpisode: { pubAT: item.published_at, id: item.id },
+            inactive
           });
         } else {
           module.exports.FindAKeyInAnArrayOfObjects(
@@ -164,6 +173,20 @@ module.exports = {
                 array[Index].TPlayTime =
                   authors[Index].TPlayTime + item.duration * item.total_plays;
                 array[Index].titles.push(item);
+                var d1 = new Date(authors[Index].mostRecentEpisode.pubAT);
+                var d2 = new Date(item.published_at);
+                if (d1 < d2) {
+                  array[Index].mostRecentEpisode.pubAT = item.published_at;
+                  array[Index].mostRecentEpisode.id = item.id;
+                }
+                if (authors[Index].inactive) {
+                  if (
+                    Math.abs(new Date() - new Date(item.published_at)) <
+                    InactivityTimer
+                  ) {
+                    array[Index].inactive = false;
+                  }
+                }
               });
             }
           );
