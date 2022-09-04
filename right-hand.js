@@ -193,12 +193,24 @@ module.exports = {
         }
       }
     });
+    var titlesFinalArray = [];
     authors.forEach((item, i) => {
       if (item.inactive){
         item.titles = []
+      } else {
+        titlesFinalArray = titlesFinalArray.concat(item.titles)
       }
     });
-    after(authors, extraordinarytitles, extraordinaryBit);
+    titlesFinalArray.sort((a, b) => {
+      if (a.total_plays > b.total_plays) {
+        return -1;
+      }
+      if (a.total_plays < b.total_plays) {
+        return 1;
+      }
+      return 0;
+    });
+    after(authors, extraordinarytitles, extraordinaryBit, titlesFinalArray);
   },
   getFormattedTime: (seconds) => {
     var days = 0;

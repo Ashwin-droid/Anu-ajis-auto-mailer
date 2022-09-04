@@ -48,8 +48,8 @@ async function main(){
     var totalPlayTime = 0;
     var artists = [];
     // beating heart of the code,the compound illitrator
-    rh.CheckForArtist(BuzzsproutResponse, (authorArray, extTitles, extbit) => {
-      console.log(JSON.stringify(authorArray))
+    rh.CheckForArtist(BuzzsproutResponse, (authorArray, extTitles, extbit, titlesFinalArray) => {
+      console.log(JSON.stringify(titlesFinalArray))
       artists = authorArray;
       extraordinarytitles = extTitles;
       extraordinaryBit = extbit;
