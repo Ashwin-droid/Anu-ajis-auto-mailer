@@ -202,13 +202,15 @@ module.exports = {
       }
     });
     titlesFinalArray.sort((a, b) => {
-      if (a.total_plays > b.total_plays) {
+      var d1 = new Date(a.published_at);
+      var d2 = new Date(b.published_at);
+      if (d1 > d2) {
         return -1;
-      }
-      if (a.total_plays < b.total_plays) {
+      } else if (d1 < d2) {
         return 1;
+      } else {
+        return 0;
       }
-      return 0;
     });
     after(authors, extraordinarytitles, extraordinaryBit, titlesFinalArray);
   },
