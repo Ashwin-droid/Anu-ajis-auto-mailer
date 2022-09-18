@@ -21,7 +21,7 @@
     "dotenv": "^16.0.1",
     "googleapis": "^103.0.0",
     "nodemailer": "^6.7.7",
-    "pg": "^8.7.3",
+    "pg": "^8.8.0",
     "text-cleaner": "^1.2.1"
   }
 }
