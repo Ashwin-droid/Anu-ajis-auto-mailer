@@ -281,14 +281,10 @@ module.exports = {
     var awards = [
       {
         [`<a href="https://www.buzzsprout.com/1173590/${
-          sortedBuzzsproutData.reduce((a, b) => {
-            return a.length > b.length ? a : b;
-          }).id
+          sortedBuzzsproutData.reduce((a, b) => {return a.title.length > b.title.length ? a : b;}).id
         }">Longest Title</a>`]: TextCleaner(
           sortedBuzzsproutData
-            .reduce((a, b) => {
-              return a.length > b.length ? a : b;
-            })
+            .reduce((a, b) => {return a.title.length > b.title.length ? a : b;})
             .title.split(`(`)[1]
             .split(`)`)[0]
         )
