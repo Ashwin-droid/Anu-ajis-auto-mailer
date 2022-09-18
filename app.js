@@ -47,20 +47,9 @@ async function main(){
     var duration = 0;
     var totalPlayTime = 0;
     var artists = [];
-    var stringifiedTitles = "";
-    const today = new Date();
     // beating heart of the code,the compound illitrator
     rh.CheckForArtist(BuzzsproutResponse, (authorArray, extTitles, extbit, titlesFinalArray) => {
-      var year = "";
-      titlesFinalArray.forEach((item, i) => {
-        const episodeDate = new Date(item.published_at);
-        if (episodeDate.getFullYear() == today.getFullYear()){
-          year = "";
-        } else {
-          year = `${episodeDate.getFullYear()}/`;
-        }
-        stringifiedTitles = `${stringifiedTitles}${year}${(episodeDate.getMonth() + 1).toString().padStart(2,"0")}/${(episodeDate.getDate()).toString().padStart(2,"0")}> ${item.title} >> ${item.total_plays}<br />`;
-      });
+      console.log(JSON.stringify(titlesFinalArray))
       artists = authorArray;
       extraordinarytitles = extTitles;
       extraordinaryBit = extbit;
@@ -154,7 +143,7 @@ async function main(){
     )} </strong></h3>${Top3AndLatest5} ${rh.award(
       BuzzsproutResponse,
       artists
-    )}<br/><br/><p><strong>${stringifiedTitles}</strong></p></body></html>`;
+    )}</body></html>`;
     rh.email(longStringOfInformation);
   }
 }
