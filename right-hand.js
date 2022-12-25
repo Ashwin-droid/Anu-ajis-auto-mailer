@@ -4,6 +4,7 @@ const nodemailer = require(`nodemailer`);
 const { google } = require(`googleapis`);
 const OAuth2 = google.auth.OAuth2;
 const TextCleaner = require(`text-cleaner`);
+const similarityEngine = require("string-similarity");
 const moduleInstanceOfAxios = axios.create({
   baseURL: `https://www.buzzsprout.com/api`
 });
@@ -58,6 +59,15 @@ module.exports = {
       subject: `Automatic Daily Mail From Ashwin's Code`,
       html: html
     });
+  },
+  isRoughlySame: (string1, string2, accuracy) => {
+    var similarity = similarityEngine.compareTwoStrings(string1,string2);
+    var similarityPercent = Math.round(similarity * 100);
+    if (similarityPercent >= accuracy) {
+      return true;
+    } else {
+      return false;
+    }
   },
   buzzsprout: {
     read: (after) => {
@@ -156,6 +166,7 @@ module.exports = {
             duration: item.duration,
             TPlayTime: item.duration * item.total_plays,
             titles: [item],
+            sus: true,  //for decting single episode players
             mostRecentEpisode: { pubAT: item.published_at, id: item.id },
             inactive
           });
@@ -172,6 +183,7 @@ module.exports = {
                 array[Index].duration = authors[Index].duration + item.duration;
                 array[Index].TPlayTime =
                   authors[Index].TPlayTime + item.duration * item.total_plays;
+                array[Index].sus = false; //not a single episode
                 array[Index].titles.push(item);
                 var d1 = new Date(authors[Index].mostRecentEpisode.pubAT);
                 var d2 = new Date(item.published_at);
@@ -344,10 +356,10 @@ module.exports = {
         }).author
       }, //longest story time artist (in seconds)
       {
-        "Highest Avrage Download Count": authorsArrayOutput.reduce((a, b) => {
+        "Highest Average Download Count": authorsArrayOutput.reduce((a, b) => {
           return a.downloads / a.entries > b.downloads / b.entries ? a : b;
         }).author
-      }, //highest avrage download count by artist
+      }, //highest Average download count by artist
       {
         "Highest number of scientific stories": "डॅा. सौ. आरती जुवेकर."
       }

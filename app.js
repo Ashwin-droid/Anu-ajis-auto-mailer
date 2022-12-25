@@ -118,11 +118,11 @@ async function main(){
         BuzzsproutResponse[Rn].total_plays
       } downloads</h6><hr>`;
     }
-    Top3AndLatest5 += `<hr><h5><strong> Total : ${tply} <br /> Avrage : ${Math.round(
+    Top3AndLatest5 += `<hr><h5><strong> Total : ${tply} <br /> Average : ${Math.round(
       tply / 5
     )}</strong></h5>`;
     // garbage for the table
-    var TableOfAuthors = `<table><tr><td><h3>Artist</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td><td><h3>Avrage</h3></td><td style='padding:10px;' ><h3>Time</h3></td><td><h3>Play Time</h3></td></tr>`;
+    var TableOfAuthors = `<table><tr><td><h3>Artist</h3></td><td><h3>Views</h3></td><td style='padding:10px'><h3>Entries</h3></td><td><h3>Average</h3></td><td style='padding:10px;' ><h3>Time</h3></td><td><h3>Play Time</h3></td></td><td><h3>Activity</h3></td></tr>`;
     var ExtraOrdinaryHtml;
     if (extraordinaryBit) {
       ExtraOrdinaryHtml = `<h1>Some Code-Breaking ExtraOrdinary Titles</h1>`;
@@ -133,6 +133,12 @@ async function main(){
       longStringOfInformation += ExtraOrdinaryHtml;
     }
     artists.forEach((item, _i) => {
+      var activityInString = "";
+      if (item.inactive) {
+        activityInString = `<p style="color:red">Inactive</p>`;
+      } else {
+        activityInString = `<p style="color:green">Active</p>`;
+      }
       TableOfAuthors = `${TableOfAuthors} <tr><td style='padding:10px'>${
         item.author
       }</td><td>${item.downloads.toString()}</td><td style='padding:10px;'>${
@@ -143,11 +149,12 @@ async function main(){
         item.duration
       )}</td><td style='padding:10px;'>${rh.getFormattedTime(
         item.TPlayTime
-      )}</td></tr>`;
+      )}</td><td style='padding:10px;'>${ activityInString
+      }</td></tr>`;
     });
     var avgdown = Math.round(total_plays / BuzzsproutResponse.length);
     TableOfAuthors = TableOfAuthors + `<table>`;
-    longStringOfInformation = `${longStringOfInformation} ${TableOfAuthors} </p><h3><strong>Total plays on all episodes ${total_plays} <br />Avrage downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(
+    longStringOfInformation = `${longStringOfInformation} ${TableOfAuthors} </p><h3><strong>Total plays on all episodes ${total_plays} <br />Average downloads per episode : ${avgdown}<br />Total time on all episodes : ${rh.getFormattedTime(
       duration
     )}<br />Total play time on all episodes : ${rh.getFormattedTime(
       totalPlayTime
