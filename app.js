@@ -57,9 +57,9 @@ async function main(){
         if (episodeDate.getFullYear() == today.getFullYear()){
           year = "";
         } else {
-          year = `${episodeDate.getFullYear()}/`;
+          year = `/${episodeDate.getFullYear()}`;
         }
-        stringifiedTitles = `${stringifiedTitles}${year}${(episodeDate.getMonth() + 1).toString().padStart(2,"0")}/${(episodeDate.getDate()).toString().padStart(2,"0")}> ${item.title} >> ${item.total_plays}<br />`;
+        stringifiedTitles = `${stringifiedTitles}${(episodeDate.getDate()).toString().padStart(2,"0")}/${(episodeDate.getMonth() + 1).toString().padStart(2,"0")}${year}> ${item.title} >> ${item.total_plays}<br />`;
       });
       artists = authorArray;
       extraordinarytitles = extTitles;
