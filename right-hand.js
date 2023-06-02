@@ -1,4 +1,4 @@
-require(`dotenv`).config();
+require(`dotenv`).config(); // Load environment variables from .env file
 const axios = require(`axios`);
 const nodemailer = require(`nodemailer`);
 const { google } = require(`googleapis`);
@@ -9,10 +9,21 @@ const moduleInstanceOfAxios = axios.create({
   baseURL: `https://www.buzzsprout.com/api`
 });
 const request = axios.create({});
-const InactivityTimer = 3888000000; //45 days
+const InactivityTimer = 3888000000; // 45 days
 
+/**
+ * Module that exports various functions and utilities
+ */
 module.exports = {
+  /**
+   * Sends an email using Gmail SMTP server
+   * @param {string} html - The HTML content of the email
+   */
   email: (html) => {
+    /**
+     * Creates a transporter for sending emails
+     * @returns {Promise<object>} - Nodemailer transporter object
+     */
     const createTransporter = async () => {
       const oauth2Client = new OAuth2(
         process.env.CLIENT_ID,
@@ -48,11 +59,16 @@ module.exports = {
       return transporter;
     };
 
+    /**
+     * Sends an email with the specified options
+     * @param {object} emailOptions - Email options (from, to, subject, html)
+     */
     const sendEmail = async (emailOptions) => {
       let emailTransporter = await createTransporter();
       await emailTransporter.sendMail(emailOptions);
     };
 
+    // Send the email
     sendEmail({
       from: process.env.EMAIL,
       to: process.env.TARGET_MAIL_ID,
@@ -60,8 +76,16 @@ module.exports = {
       html: html
     });
   },
+
+  /**
+   * Checks if two strings are roughly the same based on similarity percentage
+   * @param {string} string1 - The first string
+   * @param {string} string2 - The second string
+   * @param {number} accuracy - The minimum similarity percentage required for a match
+   * @returns {boolean} - True if the strings are roughly the same, false otherwise
+   */
   isRoughlySame: (string1, string2, accuracy) => {
-    var similarity = similarityEngine.compareTwoStrings(string1,string2);
+    var similarity = similarityEngine.compareTwoStrings(string1, string2);
     var similarityPercent = Math.round(similarity * 100);
     if (similarityPercent >= accuracy) {
       return true;
@@ -69,6 +93,11 @@ module.exports = {
       return false;
     }
   },
+
+  /**
+   * Reads data from the Buzzsprout API
+   * @param {function} after - Callback function to handle the response data
+   */
   buzzsprout: {
     read: (after) => {
       moduleInstanceOfAxios
@@ -85,6 +114,12 @@ module.exports = {
           console.log(error);
         });
     },
+
+    /**
+     * Writes data to the Buzzsprout API
+     * @param {string} id - Episode ID
+     * @param {object} object - Data to be written
+     */
     write: (id, object) => {
       if (process.env.WRITE_ACC == 1) {
         moduleInstanceOfAxios.put(
@@ -98,15 +133,20 @@ module.exports = {
           }
         );
       } else {
-        console.log(`Sadly write is access denied`);
+        console.log(`Sadly write access is denied`);
         console.log(
-          `But if i was granted write access, i would have written:\n${JSON.stringify(
+          `But if I was granted write access, I would have written:\n${JSON.stringify(
             object
           )}`
         );
       }
     }
   },
+
+  /**
+   * Fetches the Bing Image of the Day
+   * @param {function} after - Callback function to handle the image data
+   */
   bingImageOfTheDay: (after) => {
     request
       .get(
@@ -119,6 +159,11 @@ module.exports = {
         });
       });
   },
+
+  /**
+   * Sends a request to ZenQuotes API to fetch a random quote
+   * @param {function} after - Callback function to handle the quote
+   */
   QuoteRequest: (after) => {
     request
       .get(`https://zenquotes.io/api/random`)
@@ -129,93 +174,112 @@ module.exports = {
         console.log(error);
       });
   },
+
+  /**
+   * Checks for artists in an array of episodes and performs various calculations
+   * @param {array} array - Array of episodes
+   * @param {function} after - Callback function to handle the results
+   */
   CheckForArtist: (array, after) => {
     var authors = [];
-    var extraordinarytitles = [];
+    var extraordinaryTitles = [];
     var extraordinaryBit = false;
+    
+    // Iterate through each item in the array
     array.forEach((item, i) => {
+      // Check if the item's title does not contain parentheses
       if (typeof item.title.split(`(`)[1] == `undefined`) {
-        extraordinarytitles.push({
+        extraordinaryTitles.push({
           title: item.title,
           downloads: item.total_plays
         });
         extraordinaryBit = true;
       } else {
+        // Extract the author from the parentheses in the title
         var author1 = TextCleaner(item.title.split(`(`)[1].split(`)`)[0])
           .trim()
           .valueOf();
+        
         if (author1 == ``) {
-          extraordinarytitles.push({
+          extraordinaryTitles.push({
             title: item.title,
             downloads: item.total_plays
           });
           extraordinaryBit = true;
-        } else if (
-          typeof authors.find(({ author }) => author == author1) == `undefined`
-        ) {
-          var inactive = true;
-          if (
-            Math.abs(new Date() - new Date(item.published_at)) < InactivityTimer
-          ) {
-            inactive = false;
-          }
-          authors.push({
-            author: author1,
-            downloads: item.total_plays,
-            entries: 1,
-            duration: item.duration,
-            TPlayTime: item.duration * item.total_plays,
-            titles: [item],
-            sus: true,  //for decting single episode players
-            mostRecentEpisode: { pubAT: item.published_at, id: item.id },
-            inactive
-          });
         } else {
-          module.exports.FindAKeyInAnArrayOfObjects(
-            authors,
-            `author`,
-            author1,
-            (array, indexes) => {
-              indexes.forEach((Index) => {
-                array[Index].downloads =
-                  authors[Index].downloads + item.total_plays;
-                array[Index].entries = authors[Index].entries + 1;
-                array[Index].duration = authors[Index].duration + item.duration;
-                array[Index].TPlayTime =
-                  authors[Index].TPlayTime + item.duration * item.total_plays;
-                array[Index].sus = false; //not a single episode
-                array[Index].titles.push(item);
-                var d1 = new Date(authors[Index].mostRecentEpisode.pubAT);
-                var d2 = new Date(item.published_at);
-                if (d1 < d2) {
-                  array[Index].mostRecentEpisode.pubAT = item.published_at;
-                  array[Index].mostRecentEpisode.id = item.id;
-                }
-                if (authors[Index].inactive) {
-                  if (
-                    Math.abs(new Date() - new Date(item.published_at)) <
-                    InactivityTimer
-                  ) {
-                    array[Index].inactive = false;
-                  }
-                }
-              });
+          // Check if the author already exists in the authors array
+          var existingAuthor = authors.find(({ author }) => author == author1);
+          
+          if (typeof existingAuthor == `undefined`) {
+            var inactive = true;
+            if (Math.abs(new Date() - new Date(item.published_at)) < InactivityTimer) {
+              inactive = false;
             }
-          );
+            
+            // Create a new author entry in the authors array
+            authors.push({
+              author: author1,
+              downloads: item.total_plays,
+              entries: 1,
+              duration: item.duration,
+              TPlayTime: item.duration * item.total_plays,
+              titles: [item],
+              sus: true, // for detecting single episode players
+              mostRecentEpisode: { pubAT: item.published_at, id: item.id },
+              inactive
+            });
+          } else {
+            // Update the existing author's entry in the authors array
+            module.exports.FindAKeyInAnArrayOfObjects(
+              authors,
+              `author`,
+              author1,
+              (array, indexes) => {
+                indexes.forEach((Index) => {
+                  array[Index].downloads += item.total_plays;
+                  array[Index].entries++;
+                  array[Index].duration += item.duration;
+                  array[Index].TPlayTime += item.duration * item.total_plays;
+                  array[Index].sus = false; // not a single episode
+                  array[Index].titles.push(item);
+                  
+                  var d1 = new Date(authors[Index].mostRecentEpisode.pubAT);
+                  var d2 = new Date(item.published_at);
+                  
+                  if (d1 < d2) {
+                    array[Index].mostRecentEpisode.pubAT = item.published_at;
+                    array[Index].mostRecentEpisode.id = item.id;
+                  }
+                  
+                  if (authors[Index].inactive) {
+                    if (Math.abs(new Date() - new Date(item.published_at)) < InactivityTimer) {
+                      array[Index].inactive = false;
+                    }
+                  }
+                });
+              }
+            );
+          }
         }
       }
     });
+    
     var titlesFinalArray = [];
+    
+    // Filter out inactive authors and collect their titles
     authors.forEach((item, i) => {
-      if (item.inactive){
-        item.titles = []
+      if (item.inactive) {
+        item.titles = [];
       } else {
-        titlesFinalArray = titlesFinalArray.concat(item.titles)
+        titlesFinalArray = titlesFinalArray.concat(item.titles);
       }
     });
+    
+    // Sort titles by published_at date in descending order
     titlesFinalArray.sort((a, b) => {
       var d1 = new Date(a.published_at);
       var d2 = new Date(b.published_at);
+      
       if (d1 > d2) {
         return -1;
       } else if (d1 < d2) {
@@ -224,85 +288,71 @@ module.exports = {
         return 0;
       }
     });
-    after(authors, extraordinarytitles, extraordinaryBit, titlesFinalArray);
-  },
+    
+    // Invoke the 'after' callback function with the results
+    after(authors, extraordinaryTitles, extraordinaryBit, titlesFinalArray);
+  }
+  ,
+
+  /**
+   * Formats time duration in seconds to a human-readable format
+   * @param {number} seconds - Time duration in seconds
+   * @returns {string} - Formatted time string (e.g., 3mo:05d:02h:15m:30s)
+   */
   getFormattedTime: (seconds) => {
-    var days = 0;
-    var hours = 0;
-    var minutes = 0;
-    var months = 0;
-    var formattedTime = ``;
-    for (var i = 1; seconds >= 2592000; i++) {
-      months = i;
-      seconds = seconds - 2592000;
+    if (seconds === 0) {
+      return '00s'; // Return '00s' if the given value is 0
     }
-    for (var i = 1; seconds >= 86400; i++) {
-      days = i;
-      seconds = seconds - 86400;
-    }
-    for (var i = 1; seconds >= 3600; i++) {
-      hours = i;
-      seconds = seconds - 3600;
-    }
-    for (var i = 1; seconds >= 60; i++) {
-      minutes = i;
-      seconds = seconds - 60;
-    }
-    if (months >= 10) {
-      formattedTime += `${months}mo:`;
-    } else {
-      formattedTime += `0${months}mo:`;
-    }
-    if (days >= 10) {
-      formattedTime += `${days}d:`;
-    } else {
-      formattedTime += `0${days}d:`;
-    }
-    if (hours >= 10) {
-      formattedTime += `${hours}h:`;
-    } else {
-      formattedTime += `0${hours}h:`;
-    }
-    if (minutes >= 10) {
-      formattedTime += `${minutes}m:`;
-    } else {
-      formattedTime += `0${minutes}m:`;
-    }
-    if (seconds >= 10) {
-      formattedTime += `${seconds}s`;
-    } else {
-      formattedTime += `0${seconds}s`;
-    }
-    var fta = formattedTime.split(`:`);
-    var fta2 = formattedTime.split(`:`);
-    for (const item of fta) {
-      if (item == `00mo` || item == `00d` || item == `00h` || item == `00m`) {
-        fta2.splice(fta2.indexOf(item), 1);
-      } else {
-        formattedTime = ``;
-        fta2.forEach((item) => {
-          formattedTime = formattedTime + `${item} :`;
-        });
-        formattedTime = formattedTime.slice(0, -1);
-        return formattedTime;
+    const durations = [
+      { label: "mo", duration: 2592000 }, // Duration of a month in seconds
+      { label: "d", duration: 86400 }, // Duration of a day in seconds
+      { label: "h", duration: 3600 }, // Duration of an hour in seconds
+      { label: "m", duration: 60 }, // Duration of a minute in seconds
+      { label: "s", duration: 1 } // Duration of a second in seconds
+    ];
+
+    let formattedTime = ""; // Variable to store the formatted time
+    let includeTime = false; // Flag to determine whether to include time components
+
+    for (const { label, duration } of durations) {
+      const value = Math.floor(seconds / duration); // Calculate the value for the current duration
+      seconds %= duration; // Update the remaining seconds
+
+      if (includeTime || value > 0) {
+        includeTime = true; // Set the flag to true if a non-zero value is encountered
+        formattedTime += value.toString().padStart(2, "0") + label + ":"; // Append the formatted value
       }
     }
+
+    formattedTime = formattedTime.slice(0, -1); // Remove the last colon from the formatted time
+    return formattedTime; // Return the formatted time
   },
+
+  /**
+   * Generates awards based on Buzzsprout data and author statistics
+   * @param {array} sortedBuzzsproutData - Array of Buzzsprout data (episodes)
+   * @param {array} authorsArrayOutput - Array of author statistics
+   * @returns {string} - String containing the awards and winners
+   */
   award: (sortedBuzzsproutData, authorsArrayOutput) => {
     var awardsString = "";
     var awards = [
       {
         [`<a href="https://www.buzzsprout.com/1173590/${
-          sortedBuzzsproutData.reduce((a, b) => {return a.title.length > b.title.length ? a : b;}).id
+          sortedBuzzsproutData.reduce((a, b) => {
+            return a.title.length > b.title.length ? a : b;
+          }).id
         }">Longest Title</a>`]: TextCleaner(
           sortedBuzzsproutData
-            .reduce((a, b) => {return a.title.length > b.title.length ? a : b;})
+            .reduce((a, b) => {
+              return a.title.length > b.title.length ? a : b;
+            })
             .title.split(`(`)[1]
             .split(`)`)[0]
         )
           .trim()
           .valueOf()
-      }, //longest title artist
+      }, // longest title artist
       {
         [`<a href="https://www.buzzsprout.com/1173590/${
           sortedBuzzsproutData.reduce((a, b) => {
@@ -318,17 +368,17 @@ module.exports = {
         )
           .trim()
           .valueOf()
-      }, //longest episode artist
+      }, // longest episode artist
       {
         "Highest Performing Artist": authorsArrayOutput.reduce((a, b) => {
           return a.downloads > b.downloads ? a : b;
         }).author
-      }, //highest performing artist
+      }, // highest performing artist
       {
         "Longest Playtime": authorsArrayOutput.reduce((a, b) => {
           return a.TPlayTime > b.TPlayTime ? a : b;
         }).author
-      }, //longest playtime artist
+      }, // longest playtime artist
       {
         [`<a href="https://www.buzzsprout.com/1173590/${
           sortedBuzzsproutData.reduce((a, b) => {
@@ -344,22 +394,22 @@ module.exports = {
         )
           .trim()
           .valueOf()
-      }, //highest performing episode artist
+      }, // highest performing episode artist
       {
         "Highest No. Of Episodes": authorsArrayOutput.reduce((a, b) => {
           return a.entries > b.entries ? a : b;
         }).author
-      }, //highest number of episodes artist
+      }, // highest number of episodes artist
       {
         "Longest Total Story Time": authorsArrayOutput.reduce((a, b) => {
           return a.duration > b.duration ? a : b;
         }).author
-      }, //longest story time artist (in seconds)
+      }, // longest story time artist (in seconds)
       {
         "Highest Average Download Count": authorsArrayOutput.reduce((a, b) => {
           return a.downloads / a.entries > b.downloads / b.entries ? a : b;
         }).author
-      }, //highest Average download count by artist
+      }, // highest average download count by artist
       {
         "Highest number of scientific stories": "डॅा. सौ. आरती जुवेकर."
       }
@@ -406,28 +456,50 @@ module.exports = {
         tempAwardString += `<h4>🏅 The ${award} Award is Earned By ${artistName}</h4>`;
       });
     });
-    // check if a two or more artists have the same number of awards
+    // check if two or more artists have the same number of awards
     artistArray.forEach((artist) => {
       if (
         artist.NoOfAwards == highestAwards &&
         highestAwardsArtist != artist.artist
       ) {
-        awardsString = `<h3>🏅It Is A Tie Between ${highestAwardsArtist} And ${artist.artist} Each Getting a total of ${highestAwards}/9 Awards Congratulations!</h3>${tempAwardString}`;
+        awardsString = `<h3>🏅It Is A Tie Between ${highestAwardsArtist} And ${artist.artist} Each Getting a Total of ${highestAwards}/9 Awards Congratulations!</h3>${tempAwardString}`;
       } else {
         awardsString = `<h3>🏅${highestAwards}/9 Awards are Earned By ${highestAwardsArtist} Congratulations!</h3>${tempAwardString}`;
       }
     });
     return awardsString;
   },
-  FindAKeyInAnArrayOfObjects: (array, key, value, after) => {
-    var indexes = [];
-    array.forEach((item, i) => {
-      if (item[key] == value) {
-        indexes.push(i);
-      }
-    });
-    after(array, indexes);
-  },
+
+  /**
+   * Finds indexes of objects in an array that have a specific key-value pair
+   * @param {array} array - Array of objects
+   * @param {string} key - Key to search for
+   * @param {any} value - Value to match
+   * @param {function} after - Callback function to handle the results
+   */
+// Function to find objects in an array based on a specific key-value pair and execute a callback function on the found objects
+FindAKeyInAnArrayOfObjects: (array, key, value, after) => {
+  var indexes = []; // Array to store the indexes of the found objects
+  
+  // Iterate over each item in the array
+  array.forEach((item, i) => {
+    // Check if the current item has a key-value pair matching the provided key and value
+    if (item[key] == value) {
+      indexes.push(i); // Add the index of the found object to the indexes array
+    }
+  });
+  
+  after(array, indexes); // Execute the provided callback function with the original array and the indexes of the found objects
+}
+,
+
+  /**
+   * Removes objects from an array based on a specific attribute and value
+   * @param {array} arr - Array of objects
+   * @param {string} attr - Attribute to compare
+   * @param {any} value - Value to match
+   * @returns {array} - Updated array with objects removed
+   */
   removeByAttr: (arr, attr, value) => {
     var i = arr.length;
     while (i--) {
