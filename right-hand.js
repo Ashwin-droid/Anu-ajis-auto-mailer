@@ -99,20 +99,21 @@ module.exports = {
    * @param {function} after - Callback function to handle the response data
    */
   buzzsprout: {
-    read: (after) => {
-      moduleInstanceOfAxios
-        .get(`/1173590/episodes.json`, {
-          headers: {
-            Authorization: `Token token=${process.env.API_KEY}`,
-            "Content-Type": `application/json`
+    read: async () => {
+      try {
+        const response = await moduleInstanceOfAxios.get(
+          `/1173590/episodes.json`,
+          {
+            headers: {
+              Authorization: `Token token=${process.env.API_KEY}`,
+              "Content-Type": `application/json`
+            }
           }
-        })
-        .then((response) => {
-          after(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+        );
+        return response.data;
+      } catch (error) {
+        console.log(error);
+      }
     },
 
     /**
@@ -147,32 +148,32 @@ module.exports = {
    * Fetches the Bing Image of the Day
    * @param {function} after - Callback function to handle the image data
    */
-  bingImageOfTheDay: (after) => {
-    request
-      .get(
+  bingImageOfTheDay: async () => {
+    try {
+      const response = await request.get(
         `https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US`
-      )
-      .then((response) => {
-        after({
-          url: `https://www.bing.com${response.data.images[0].url}`,
-          title: response.data.images[0].title
-        });
-      });
+      );
+      return {
+        url: `https://www.bing.com${response.data.images[0].url}`,
+        title: response.data.images[0].title
+      };
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   },
 
   /**
    * Sends a request to ZenQuotes API to fetch a random quote
    * @param {function} after - Callback function to handle the quote
    */
-  QuoteRequest: (after) => {
-    request
-      .get(`https://zenquotes.io/api/random`)
-      .then((response) => {
-        after(response.data[0].h);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  QuoteRequest: async () => {
+    try {
+      const response = await request.get(`https://zenquotes.io/api/random`);
+      return response.data[0].h;
+    } catch (error) {
+      console.log(error);
+    }
   },
 
   /**
@@ -180,11 +181,11 @@ module.exports = {
    * @param {array} array - Array of episodes
    * @param {function} after - Callback function to handle the results
    */
-  CheckForArtist: (array, after) => {
+  CheckForArtist: (array) => {
     var authors = [];
     var extraordinaryTitles = [];
     var extraordinaryBit = false;
-    
+
     // Iterate through each item in the array
     array.forEach((item, i) => {
       // Check if the item's title does not contain parentheses
@@ -199,7 +200,7 @@ module.exports = {
         var author1 = TextCleaner(item.title.split(`(`)[1].split(`)`)[0])
           .trim()
           .valueOf();
-        
+
         if (author1 == ``) {
           extraordinaryTitles.push({
             title: item.title,
@@ -209,13 +210,16 @@ module.exports = {
         } else {
           // Check if the author already exists in the authors array
           var existingAuthor = authors.find(({ author }) => author == author1);
-          
+
           if (typeof existingAuthor == `undefined`) {
             var inactive = true;
-            if (Math.abs(new Date() - new Date(item.published_at)) < InactivityTimer) {
+            if (
+              Math.abs(new Date() - new Date(item.published_at)) <
+              InactivityTimer
+            ) {
               inactive = false;
             }
-            
+
             // Create a new author entry in the authors array
             authors.push({
               author: author1,
@@ -242,17 +246,20 @@ module.exports = {
                   array[Index].TPlayTime += item.duration * item.total_plays;
                   array[Index].sus = false; // not a single episode
                   array[Index].titles.push(item);
-                  
+
                   var d1 = new Date(authors[Index].mostRecentEpisode.pubAT);
                   var d2 = new Date(item.published_at);
-                  
+
                   if (d1 < d2) {
                     array[Index].mostRecentEpisode.pubAT = item.published_at;
                     array[Index].mostRecentEpisode.id = item.id;
                   }
-                  
+
                   if (authors[Index].inactive) {
-                    if (Math.abs(new Date() - new Date(item.published_at)) < InactivityTimer) {
+                    if (
+                      Math.abs(new Date() - new Date(item.published_at)) <
+                      InactivityTimer
+                    ) {
                       array[Index].inactive = false;
                     }
                   }
@@ -263,9 +270,9 @@ module.exports = {
         }
       }
     });
-    
+
     var titlesFinalArray = [];
-    
+
     // Filter out inactive authors and collect their titles
     authors.forEach((item, i) => {
       if (item.inactive) {
@@ -274,12 +281,12 @@ module.exports = {
         titlesFinalArray = titlesFinalArray.concat(item.titles);
       }
     });
-    
+
     // Sort titles by published_at date in descending order
     titlesFinalArray.sort((a, b) => {
       var d1 = new Date(a.published_at);
       var d2 = new Date(b.published_at);
-      
+
       if (d1 > d2) {
         return -1;
       } else if (d1 < d2) {
@@ -288,12 +295,15 @@ module.exports = {
         return 0;
       }
     });
-    
-    // Invoke the 'after' callback function with the results
-    after(authors, extraordinaryTitles, extraordinaryBit, titlesFinalArray);
-  }
-  ,
 
+    // Return the results
+    return {
+      authors,
+      extraordinaryTitles,
+      extraordinaryBit,
+      titlesFinalArray
+    };
+  },
   /**
    * Formats time duration in seconds to a human-readable format
    * @param {number} seconds - Time duration in seconds
@@ -301,7 +311,7 @@ module.exports = {
    */
   getFormattedTime: (seconds) => {
     if (seconds === 0) {
-      return '00s'; // Return '00s' if the given value is 0
+      return "00s"; // Return '00s' if the given value is 0
     }
     const durations = [
       { label: "mo", duration: 2592000 }, // Duration of a month in seconds
@@ -477,22 +487,20 @@ module.exports = {
    * @param {any} value - Value to match
    * @param {function} after - Callback function to handle the results
    */
-// Function to find objects in an array based on a specific key-value pair and execute a callback function on the found objects
-FindAKeyInAnArrayOfObjects: (array, key, value, after) => {
-  var indexes = []; // Array to store the indexes of the found objects
-  
-  // Iterate over each item in the array
-  array.forEach((item, i) => {
-    // Check if the current item has a key-value pair matching the provided key and value
-    if (item[key] == value) {
-      indexes.push(i); // Add the index of the found object to the indexes array
-    }
-  });
-  
-  after(array, indexes); // Execute the provided callback function with the original array and the indexes of the found objects
-}
-,
+  // Function to find objects in an array based on a specific key-value pair and execute a callback function on the found objects
+  FindAKeyInAnArrayOfObjects: (array, key, value, after) => {
+    var indexes = []; // Array to store the indexes of the found objects
 
+    // Iterate over each item in the array
+    array.forEach((item, i) => {
+      // Check if the current item has a key-value pair matching the provided key and value
+      if (item[key] == value) {
+        indexes.push(i); // Add the index of the found object to the indexes array
+      }
+    });
+
+    after(array, indexes); // Execute the provided callback function with the original array and the indexes of the found objects
+  },
   /**
    * Removes objects from an array based on a specific attribute and value
    * @param {array} arr - Array of objects
