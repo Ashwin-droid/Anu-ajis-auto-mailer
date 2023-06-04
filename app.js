@@ -1,5 +1,6 @@
 //imports
 const env = require(`dotenv`).config();
+const rightHand = require("./right-hand.js");
 const rh = require(`./right-hand.js`);
 const TextCleaner = require(`text-cleaner`);
 
@@ -138,12 +139,21 @@ async function main() {
       }
     }
 
+    AuthorArrayOfSimilarity.forEach((item, i) => {
+      rightHand.authorSwitcheroo(
+        rightHand.buzzsprout.write,
+        item.author2titles,
+        item.author1
+      );
+      // wait 1 second
+      setTimeout(() => {}, 5000);
+    });
+
     // NOTE: Only for debugging
     // // Loop through each author with similarity and add to the longStringOfInformation variable
     // AuthorArrayOfSimilarity.forEach((item, i) => {
     //   longStringOfInformation += `<h3>${item.author1}(${item.entries1}) is similar to ${item.author2}(${item.entries2}) with a similarity index of ${item.similarityIndex}</h3>`;
     // });
-
 
     //general iterator (vague)
 

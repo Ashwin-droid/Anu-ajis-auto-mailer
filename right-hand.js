@@ -16,6 +16,18 @@ const InactivityTimer = 3888000000; // 45 days
  */
 module.exports = {
   /**
+   * Replaces the author name in each title of the given array of author titles with the provided author name.
+   * @param {function} writer - The function used to write the updated titles.
+   * @param {Array} AuthorTitles - The array of author titles to update.
+   * @param {string} Author - The name of the author to replace in each title.
+   */
+  authorSwitcheroo: (writer, AuthorTitles, Author) => {
+    AuthorTitles.forEach((element) => {
+      const title = `${element.title.split(`(`)[0].trim()} (${Author})`;
+      writer(element.id, { title: title, artist: Author });
+    });
+  },
+  /**
    * Sends an email using Gmail SMTP server
    * @param {string} html - The HTML content of the email
    */
@@ -76,15 +88,6 @@ module.exports = {
       html: html
     });
   },
-
-  /**
-   * Checks if two strings are roughly the same based on similarity percentage
-   * @param {string} string1 - The first string
-   * @param {string} string2 - The second string
-   * @param {number} accuracy - The minimum similarity percentage required for a match
-   * @returns {object} - Object containing the truth value and similarity index
-   */
-
   /**
    * Checks if two strings are roughly the same based on similarity percentage
    * @param {string} string1 - The first string
@@ -106,7 +109,6 @@ module.exports = {
       return { isSimilar: false, similarityIndex: similarityPercent };
     }
   },
-
 
   /**
    * Reads data from the Buzzsprout API
