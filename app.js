@@ -44,13 +44,18 @@ async function main() {
     var results = rh.CheckForArtist(BuzzsproutResponse);
 
     // Extract the required data from the results
+
+    // Iterate through each item in the titlesFinalArray array
     results.titlesFinalArray.forEach((item, i) => {
+      // Get the date of the episode
       const episodeDate = new Date(item.published_at);
+      // Check if the episode was published in the current year
       if (episodeDate.getFullYear() == today.getFullYear()) {
         year = "";
       } else {
         year = `/${episodeDate.getFullYear()}`;
       }
+      // Add the episode title and total plays to the stringifiedTitles variable
       stringifiedTitles = `${stringifiedTitles}${episodeDate
         .getDate()
         .toString()
@@ -58,9 +63,87 @@ async function main() {
         .toString()
         .padStart(2, "0")}${year}> ${item.title} >> ${item.total_plays}<br />`;
     });
+
+    // Set the artists variable to the authors array from the CheckForArtist function
     artists = results.authors;
+    // Set the extraordinarytitles variable to the extraordinaryTitles array from the CheckForArtist function
     extraordinarytitles = results.extraordinaryTitles;
+    // Set the extraordinaryBit variable to the extraordinaryBit value from the CheckForArtist function
     extraordinaryBit = results.extraordinaryBit;
+
+    //load the sus authors
+
+    // Initialize an array to store authors with similarity
+    var AuthorArrayOfSimilarity = [];
+
+    // Loop through each author in the results array
+    results.authors.forEach((item, i) => {
+      // Initialize variables to store similarity data
+      var similirityIndex = Number.NEGATIVE_INFINITY;
+      var similarAuthor = "";
+      var similarAuthorEntries = Number.NEGATIVE_INFINITY;
+      var similarAuthorTitles = [];
+
+      // Loop through each author again to find similar authors
+      results.authors.forEach((item2, i2) => {
+        // Check if the two authors are similar
+        if (rh.isRoughlySame(item.author, item2.author, 80).isSimilar) {
+          // Check if the two authors are different
+          if (item.author != item2.author) {
+            // Check if the second author has more entries than the first
+            if (item2.entries > similarAuthorEntries) {
+              // Update similarity data
+              similarAuthorEntries = item2.entries;
+              similirityIndex = rh.isRoughlySame(
+                item.author,
+                item2.author,
+                80
+              ).similarityIndex;
+              similarAuthor = item2.author;
+              similarAuthorTitles = item2.titles;
+            }
+          }
+        }
+      });
+
+      // Check if any similar authors were found
+      if (similirityIndex != Number.NEGATIVE_INFINITY) {
+        // Add similarity data to the AuthorArrayOfSimilarity array
+        AuthorArrayOfSimilarity.push({
+          author1: item.author,
+          author2: similarAuthor,
+          similarityIndex: similirityIndex,
+          entries1: item.entries,
+          entries2: similarAuthorEntries,
+          author1titles: item.titles,
+          author2titles: similarAuthorTitles
+        });
+      }
+    });
+
+    // Sort the AuthorArrayOfSimilarity array by number of entries
+    for (let i = 0; i < AuthorArrayOfSimilarity.length; i++) {
+      if (
+        AuthorArrayOfSimilarity[i].entries2 >
+        AuthorArrayOfSimilarity[i].entries1
+      ) {
+        let temp = AuthorArrayOfSimilarity[i].author1;
+        AuthorArrayOfSimilarity[i].author1 = AuthorArrayOfSimilarity[i].author2;
+        AuthorArrayOfSimilarity[i].author2 = temp;
+
+        temp = AuthorArrayOfSimilarity[i].entries1;
+        AuthorArrayOfSimilarity[i].entries1 =
+          AuthorArrayOfSimilarity[i].entries2;
+        AuthorArrayOfSimilarity[i].entries2 = temp;
+      }
+    }
+
+    // NOTE: Only for debugging
+    // // Loop through each author with similarity and add to the longStringOfInformation variable
+    // AuthorArrayOfSimilarity.forEach((item, i) => {
+    //   longStringOfInformation += `<h3>${item.author1}(${item.entries1}) is similar to ${item.author2}(${item.entries2}) with a similarity index of ${item.similarityIndex}</h3>`;
+    // });
+
 
     //general iterator (vague)
 
@@ -91,12 +174,17 @@ async function main() {
       }
     });
 
-
     //first 3 highest episodes
     let topEpisodes = "";
     const emojis = ["🥇", "🥈", "🥉"];
     for (let i = 0; i < 3; i++) {
-      topEpisodes += `<h${i+2}>${emojis[i]} ${i+1}. <a href="https://www.buzzsprout.com/1173590/${BuzzsproutResponse[i].id}">${BuzzsproutResponse[i].title}</a> which has ${BuzzsproutResponse[i].total_plays} downloads </h${i+2}>`;
+      topEpisodes += `<h${i + 2}>${emojis[i]} ${
+        i + 1
+      }. <a href="https://www.buzzsprout.com/1173590/${
+        BuzzsproutResponse[i].id
+      }">${BuzzsproutResponse[i].title}</a> which has ${
+        BuzzsproutResponse[i].total_plays
+      } downloads </h${i + 2}>`;
     }
     Top3AndLatest5 = topEpisodes + `<br/> <h4>Runner ups</h4>`;
 
@@ -127,7 +215,11 @@ async function main() {
       tply += episode.total_plays;
 
       // Create a string with the episode title, total plays, and a link to the episode
-      const episodeString = `<h6>${i + 1}) Title: <a href="https://www.buzzsprout.com/1173590/${episode.id}">${episode.title}</a> which has ${episode.total_plays} downloads</h6><hr>`;
+      const episodeString = `<h6>${
+        i + 1
+      }) Title: <a href="https://www.buzzsprout.com/1173590/${episode.id}">${
+        episode.title
+      }</a> which has ${episode.total_plays} downloads</h6><hr>`;
 
       // Add the episode string to the Top3AndLatest5 variable
       Top3AndLatest5 += episodeString;

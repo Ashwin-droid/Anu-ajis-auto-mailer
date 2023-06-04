@@ -82,17 +82,31 @@ module.exports = {
    * @param {string} string1 - The first string
    * @param {string} string2 - The second string
    * @param {number} accuracy - The minimum similarity percentage required for a match
-   * @returns {boolean} - True if the strings are roughly the same, false otherwise
+   * @returns {object} - Object containing the truth value and similarity index
+   */
+
+  /**
+   * Checks if two strings are roughly the same based on similarity percentage
+   * @param {string} string1 - The first string
+   * @param {string} string2 - The second string
+   * @param {number} accuracy - The minimum similarity percentage required for a match
+   * @returns {object} - Object containing the truth value and similarity index
    */
   isRoughlySame: (string1, string2, accuracy) => {
+    // Compare the similarity of the two strings using the string-similarity package
     var similarity = similarityEngine.compareTwoStrings(string1, string2);
+    // Calculate the similarity percentage and round it to the nearest integer
     var similarityPercent = Math.round(similarity * 100);
+    // Check if the similarity percentage is greater than or equal to the required accuracy
     if (similarityPercent >= accuracy) {
-      return true;
+      // If the strings are similar enough, return an object with isSimilar set to true and the similarity index
+      return { isSimilar: true, similarityIndex: similarityPercent };
     } else {
-      return false;
+      // If the strings are not similar enough, return an object with isSimilar set to false and the similarity index
+      return { isSimilar: false, similarityIndex: similarityPercent };
     }
   },
+
 
   /**
    * Reads data from the Buzzsprout API
@@ -146,7 +160,7 @@ module.exports = {
 
   /**
    * Fetches the Bing Image of the Day
-   * @param {function} after - Callback function to handle the image data
+   * @returns {object} - Object containing the URL and title of the image
    */
   bingImageOfTheDay: async () => {
     try {
@@ -179,9 +193,10 @@ module.exports = {
   /**
    * Checks for artists in an array of episodes and performs various calculations
    * @param {array} array - Array of episodes
-   * @param {function} after - Callback function to handle the results
+   * @returns {object} - Object containing the results of the calculations
    */
   CheckForArtist: (array) => {
+    // Initialize variables to store the results of the calculations
     var authors = [];
     var extraordinaryTitles = [];
     var extraordinaryBit = false;
@@ -190,6 +205,7 @@ module.exports = {
     array.forEach((item, i) => {
       // Check if the item's title does not contain parentheses
       if (typeof item.title.split(`(`)[1] == `undefined`) {
+        // Add the item to the extraordinaryTitles array if it does not contain parentheses
         extraordinaryTitles.push({
           title: item.title,
           downloads: item.total_plays
@@ -202,6 +218,7 @@ module.exports = {
           .valueOf();
 
         if (author1 == ``) {
+          // Add the item to the extraordinaryTitles array if the author is empty
           extraordinaryTitles.push({
             title: item.title,
             downloads: item.total_plays
@@ -212,6 +229,7 @@ module.exports = {
           var existingAuthor = authors.find(({ author }) => author == author1);
 
           if (typeof existingAuthor == `undefined`) {
+            // Create a new author entry in the authors array if the author does not exist
             var inactive = true;
             if (
               Math.abs(new Date() - new Date(item.published_at)) <
@@ -220,7 +238,6 @@ module.exports = {
               inactive = false;
             }
 
-            // Create a new author entry in the authors array
             authors.push({
               author: author1,
               downloads: item.total_plays,
