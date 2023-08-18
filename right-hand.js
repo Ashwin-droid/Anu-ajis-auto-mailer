@@ -210,7 +210,8 @@ module.exports = {
         // Add the item to the extraordinaryTitles array if it does not contain parentheses
         extraordinaryTitles.push({
           title: item.title,
-          downloads: item.total_plays
+          downloads: item.total_plays,
+          id: item.id
         });
         extraordinaryBit = true;
       } else {

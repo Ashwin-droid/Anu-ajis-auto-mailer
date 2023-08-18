@@ -265,7 +265,7 @@ async function main() {
       ExtraOrdinaryHtml = `<h1>Some Code-Breaking ExtraOrdinary Titles</h1>`;
       extraordinarytitles.forEach((item, i) => {
         var id = i + 1;
-        ExtraOrdinaryHtml = `${ExtraOrdinaryHtml} <h2>Title no ${id}, Title ${item.title} </h2>`;
+        ExtraOrdinaryHtml = `${ExtraOrdinaryHtml} <h2>Title no ${id}, Title <a href="https://www.buzzsprout.com/1173590/episodes/${item.id}">${item.title}</a> </h2>`;
       });
       longStringOfInformation += ExtraOrdinaryHtml;
     }
