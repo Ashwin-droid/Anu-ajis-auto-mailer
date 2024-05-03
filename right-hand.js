@@ -9,23 +9,12 @@ const moduleInstanceOfAxios = axios.create({
 });
 const request = axios.create({});
 const InactivityTimer = 3888000000; // 45 days
+const OpenAI = require(`openai`);
 
 /**
  * Module that exports various functions and utilities
  */
 module.exports = {
-  /**
-   * Replaces the author name in each title of the given array of author titles with the provided author name.
-   * @param {function} writer - The function used to write the updated titles.
-   * @param {Array} AuthorTitles - The array of author titles to update.
-   * @param {string} Author - The name of the author to replace in each title.
-   */
-  authorSwitcheroo: (writer, AuthorTitles, Author) => {
-    AuthorTitles.forEach((element) => {
-      const title = `${element.title.split(`(`)[0].trim()} (${Author})`;
-      writer(element.id, { title: title, artist: Author });
-    });
-  },
   /**
    * Sends an email using Gmail SMTP server
    * @param {string} html - The HTML content of the email
@@ -112,13 +101,13 @@ module.exports = {
 
     /**
      * Writes data to the Buzzsprout API
-     * @param {string} id - Episode ID
+     * @param {Integer} id - Episode ID
      * @param {object} object - Data to be written
      */
     write: (id, object) => {
       if (process.env.WRITE_ACC == 1) {
         moduleInstanceOfAxios.put(
-          `/1173590/episodes/` + id.toString() + `.json`,
+          `/1173590/episodes/${id.toString()}.json`,
           object,
           {
             headers: {
@@ -172,14 +161,16 @@ module.exports = {
 
   /**
    * Checks for artists in an array of episodes and performs various calculations
-   * @param {array} array - Array of episodes
+   * @param {array} buzzsproutArray - Array of episodes
+   * @param {array} unfixableTitles - Array of titles that cannot be fixed
    * @returns {object} - Object containing the results of the calculations
    */
-  CheckForArtist: (array) => {
+  CheckForArtist: (array, unfixableTitles = [], firstRun = true) => {
     // Initialize variables to store the results of the calculations
     var authors = [];
     var extraordinaryTitles = [];
     var extraordinaryBit = false;
+    var id = 0;
 
     // Iterate through each item in the array
     array.forEach((item, i) => {
@@ -198,8 +189,11 @@ module.exports = {
           .trim()
           .valueOf();
 
-        if (author1 == ``) {
-          // Add the item to the extraordinaryTitles array if the author is empty
+        if (
+          author1 == `` ||
+          unfixableTitles.some((artist) => artist.title == item.title)
+        ) {
+          // Add the item to the extraordinaryTitles array if the author is empty or the author auto-unfixable and marked for deletion.
           extraordinaryTitles.push({
             title: item.title,
             downloads: item.total_plays
@@ -228,7 +222,8 @@ module.exports = {
               titles: [item],
               sus: true, // for detecting single episode players
               mostRecentEpisode: { pubAT: item.published_at, id: item.id },
-              inactive
+              inactive,
+              id: id++
             });
           } else {
             // Update the existing author's entry in the authors array
@@ -273,9 +268,7 @@ module.exports = {
 
     // Filter out inactive authors and collect their titles
     authors.forEach((item, i) => {
-      if (item.inactive) {
-        item.titles = [];
-      } else {
+      if (!item.inactive) {
         titlesFinalArray = titlesFinalArray.concat(item.titles);
       }
     });
@@ -294,6 +287,81 @@ module.exports = {
       }
     });
 
+    // Secret OpenAI Auto title fixer
+    // Array diffusion for keys that are needed
+    const diffusedArray = authors.map((author) => {
+      return {
+        id: author.id,
+        name: author.author,
+        entries: author.entries
+      };
+    });
+    // OpenAI API Call
+
+    const openai = new OpenAI.OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+    var response = {};
+    (async () => {
+      return await openai.chat.completions.create({
+        model: "gpt-4-turbo",
+        messages: [
+          {
+            role: "system",
+            content:
+              'Given is a list of authors with duplicate names in the database. To be more effective, you are given the task of merging them together. Note that this response is hooked to live upstream API so the response format must be strictly maintained in JSON.\nOutput format (do not output anything apart from this and do not output this in a code bracket or include comments). Strictly output JSON only. If a generic name exists then delete it. Do not delete any author if it has more than 3 entries. This does not mean you should delete any author with less than 3 entries. For merge, the rule is to merge similar names with lower entries (targets) with larger entries (source). This is done to save upstream API requests. If duplicates or stupid names do not exist, omit the entry outright.\n```\n{\n   "edits-required": true,\n   "merge": [{\n      "Source": <sourceID>, //If duplicate exists (integer)\n      "Targets": [<Array of target IDs>] //If duplicate exists (integer array)\n   },\n  ... //Other merges\n],\n"delete": [ <original ID>, // IDs to delete\n... //Other deletes\n]\n}\n```\n\nIf no deletes exist then return an empty array for the value and if no merges exist then too return an empty array for the value. Do not break the schema. If both do not exist then return the following.\n\n```\n{\n   "edits-required": false\n}\n```'
+          },
+          {
+            role: "user",
+            content: JSON.stringify(diffusedArray)
+          }
+        ],
+        temperature: 0,
+        max_tokens: 1000,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        seed: 37,
+        response_format: { type: "json_object" }
+      });
+    })().then((data) => {
+      response = JSON.parse(data.choices[0].message.content);
+      var processor = {
+        edits: response["edits-required"],
+        merge: response["merge"].map((id) => {
+          return {
+            source: authors.find((author) => author.id == id.Source),
+            targets: id.Targets.map((target) => {
+              return authors.find((author) => author.id == target);
+            })
+          };
+        }),
+        delete: response["delete"].map((id) => {
+          return authors.find((author) => author.id == id);
+        })
+      };
+      if (processor.edits && firstRun) {
+        processor.merge.forEach((authors) => {
+          var source = authors.source;
+          var targets = authors.targets;
+          targets.forEach((hitman) => {
+            hitman.titles.forEach((target) => {
+              module.exports.buzzsprout.write(target.id, {
+                title: `${target.title.split(`(`)[0]} (${source.author})`,
+                artist: source.author
+              });
+              // Wait for 500ms to avoid rate limiting
+              setTimeout(() => {}, 500);
+            });
+          });
+        });
+        (async () => {
+          return await module.exports.buzzsprout.read();
+        })().then((newData) => {
+          module.exports.CheckForArtist(newData, unfixableTitles, false);
+        });
+      }
+    });
     // Return the results
     return {
       authors,
