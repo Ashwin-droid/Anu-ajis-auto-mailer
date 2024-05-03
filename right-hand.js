@@ -175,7 +175,11 @@ module.exports = {
     // Iterate through each item in the array
     array.forEach((item, i) => {
       // Check if the item's title does not contain parentheses
-      if (typeof item.title.split(`(`)[1] == `undefined`) {
+      if (
+        typeof item.title.split(`(`)[1] == `undefined` ||
+        item.title.split(`(`)[1] == `` ||
+        unfixableTitles.some((artist) => artist.id == item.id)
+      ) {
         // Add the item to the extraordinaryTitles array if it does not contain parentheses
         extraordinaryTitles.push({
           title: item.title,
@@ -189,77 +193,64 @@ module.exports = {
           .trim()
           .valueOf();
 
-        if (
-          author1 == `` ||
-          unfixableTitles.some((artist) => artist.title == item.title)
-        ) {
-          // Add the item to the extraordinaryTitles array if the author is empty or the author auto-unfixable and marked for deletion.
-          extraordinaryTitles.push({
-            title: item.title,
-            downloads: item.total_plays
-          });
-          extraordinaryBit = true;
-        } else {
-          // Check if the author already exists in the authors array
-          var existingAuthor = authors.find(({ author }) => author == author1);
+        // Check if the author already exists in the authors array
+        var existingAuthor = authors.find(({ author }) => author == author1);
 
-          if (typeof existingAuthor == `undefined`) {
-            // Create a new author entry in the authors array if the author does not exist
-            var inactive = true;
-            if (
-              Math.abs(new Date() - new Date(item.published_at)) <
-              InactivityTimer
-            ) {
-              inactive = false;
-            }
-
-            authors.push({
-              author: author1,
-              downloads: item.total_plays,
-              entries: 1,
-              duration: item.duration,
-              TPlayTime: item.duration * item.total_plays,
-              titles: [item],
-              sus: true, // for detecting single episode players
-              mostRecentEpisode: { pubAT: item.published_at, id: item.id },
-              inactive,
-              id: id++
-            });
-          } else {
-            // Update the existing author's entry in the authors array
-            module.exports.FindAKeyInAnArrayOfObjects(
-              authors,
-              `author`,
-              author1,
-              (array, indexes) => {
-                indexes.forEach((Index) => {
-                  array[Index].downloads += item.total_plays;
-                  array[Index].entries++;
-                  array[Index].duration += item.duration;
-                  array[Index].TPlayTime += item.duration * item.total_plays;
-                  array[Index].sus = false; // not a single episode
-                  array[Index].titles.push(item);
-
-                  var d1 = new Date(authors[Index].mostRecentEpisode.pubAT);
-                  var d2 = new Date(item.published_at);
-
-                  if (d1 < d2) {
-                    array[Index].mostRecentEpisode.pubAT = item.published_at;
-                    array[Index].mostRecentEpisode.id = item.id;
-                  }
-
-                  if (authors[Index].inactive) {
-                    if (
-                      Math.abs(new Date() - new Date(item.published_at)) <
-                      InactivityTimer
-                    ) {
-                      array[Index].inactive = false;
-                    }
-                  }
-                });
-              }
-            );
+        if (typeof existingAuthor == `undefined`) {
+          // Create a new author entry in the authors array if the author does not exist
+          var inactive = true;
+          if (
+            Math.abs(new Date() - new Date(item.published_at)) < InactivityTimer
+          ) {
+            inactive = false;
           }
+
+          authors.push({
+            author: author1,
+            downloads: item.total_plays,
+            entries: 1,
+            duration: item.duration,
+            TPlayTime: item.duration * item.total_plays,
+            titles: [item],
+            sus: true, // for detecting single episode players
+            mostRecentEpisode: { pubAT: item.published_at, id: item.id },
+            inactive,
+            id: id++
+          });
+        } else {
+          // Update the existing author's entry in the authors array
+          module.exports.FindAKeyInAnArrayOfObjects(
+            authors,
+            `author`,
+            author1,
+            (array, indexes) => {
+              indexes.forEach((Index) => {
+                array[Index].downloads += item.total_plays;
+                array[Index].entries++;
+                array[Index].duration += item.duration;
+                array[Index].TPlayTime += item.duration * item.total_plays;
+                array[Index].sus = false; // not a single episode
+                array[Index].titles.push(item);
+
+                var d1 = new Date(authors[Index].mostRecentEpisode.pubAT);
+                var d2 = new Date(item.published_at);
+
+                if (d1 < d2) {
+                  array[Index].mostRecentEpisode.pubAT = item.published_at;
+                  array[Index].mostRecentEpisode.id = item.id;
+                }
+
+                if (authors[Index].inactive) {
+                  if (
+                    Math.abs(new Date() - new Date(item.published_at)) <
+                    InactivityTimer
+                  ) {
+                    array[Index].inactive = false;
+                  }
+                }
+              });
+            }
+          );
         }
       }
     });
@@ -336,9 +327,11 @@ module.exports = {
             })
           };
         }),
-        delete: response["delete"].map((id) => {
-          return authors.find((author) => author.id == id);
-        })
+        delete: response["delete"]
+          .map((id) => {
+            return authors.find((author) => author.id == id).titles;
+          })
+          .flat()
       };
       if (processor.edits && firstRun) {
         processor.merge.forEach((authors) => {
@@ -358,17 +351,21 @@ module.exports = {
         (async () => {
           return await module.exports.buzzsprout.read();
         })().then((newData) => {
-          module.exports.CheckForArtist(newData, unfixableTitles, false);
+          module.exports.CheckForArtist(
+            newData,
+            processor.delete,
+            false
+          );
         });
       }
+      // Return the results
+      return {
+        authors,
+        extraordinaryTitles,
+        extraordinaryBit,
+        titlesFinalArray
+      };
     });
-    // Return the results
-    return {
-      authors,
-      extraordinaryTitles,
-      extraordinaryBit,
-      titlesFinalArray
-    };
   },
   /**
    * Formats time duration in seconds to a human-readable format
