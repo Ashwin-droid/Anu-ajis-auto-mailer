@@ -4,7 +4,6 @@ const nodemailer = require(`nodemailer`);
 const { google } = require(`googleapis`);
 const OAuth2 = google.auth.OAuth2;
 const TextCleaner = require(`text-cleaner`);
-const similarityEngine = require("string-similarity");
 const moduleInstanceOfAxios = axios.create({
   baseURL: `https://www.buzzsprout.com/api`
 });
@@ -87,27 +86,6 @@ module.exports = {
       subject: `Automatic Daily Mail From Ashwin's Code`,
       html: html
     });
-  },
-  /**
-   * Checks if two strings are roughly the same based on similarity percentage
-   * @param {string} string1 - The first string
-   * @param {string} string2 - The second string
-   * @param {number} accuracy - The minimum similarity percentage required for a match
-   * @returns {object} - Object containing the truth value and similarity index
-   */
-  isRoughlySame: (string1, string2, accuracy) => {
-    // Compare the similarity of the two strings using the string-similarity package
-    var similarity = similarityEngine.compareTwoStrings(string1, string2);
-    // Calculate the similarity percentage and round it to the nearest integer
-    var similarityPercent = Math.round(similarity * 100);
-    // Check if the similarity percentage is greater than or equal to the required accuracy
-    if (similarityPercent >= accuracy) {
-      // If the strings are similar enough, return an object with isSimilar set to true and the similarity index
-      return { isSimilar: true, similarityIndex: similarityPercent };
-    } else {
-      // If the strings are not similar enough, return an object with isSimilar set to false and the similarity index
-      return { isSimilar: false, similarityIndex: similarityPercent };
-    }
   },
 
   /**
