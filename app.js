@@ -42,7 +42,7 @@ async function main() {
     const today = new Date();
     // beating heart of the code,the compound iterator
     // Call the function and store the results in a variable
-    var results = rh.CheckForArtist(BuzzsproutResponse);
+    var results = await rh.CheckForArtist(BuzzsproutResponse);
 
     // Extract the required data from the results
 
