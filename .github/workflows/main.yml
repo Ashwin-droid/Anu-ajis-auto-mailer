@@ -16,7 +16,7 @@ env:
   REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
   TARGET_MAIL_ID: ${{ secrets.TARGET_MAIL_ID }}
   WRITE_ACC: ${{ secrets.WRITE_ACC }}
-  OPEN_API_KEY: ${{ secrets.OPEN_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
 jobs:
   Mail:
@@ -41,7 +41,7 @@ jobs:
         REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
         TARGET_MAIL_ID: ${{ secrets.TARGET_MAIL_ID }}
         WRITE_ACC: ${{ secrets.WRITE_ACC }}
-        OPEN_API_KEY: ${{ secrets.OPEN_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
         touch .env
         echo API_KEY=${{ secrets.API_KEY }} >> .env
@@ -51,6 +51,6 @@ jobs:
         echo REFRESH_TOKEN=${{ secrets.REFRESH_TOKEN }} >> .env
         echo TARGET_MAIL_ID=${{ secrets.TARGET_MAIL_ID }} >> .env
         echo WRITE_ACC=${{ secrets.WRITE_ACC }} >> .env
-        echo OPEN_API_KEY=${{ secrets.OPEN_API_KEY }} >> .env
+        echo OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} >> .env
     - name: Run Mailer
       run: npm start
