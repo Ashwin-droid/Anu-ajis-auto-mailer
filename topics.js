@@ -33,21 +33,60 @@ module.exports.topicLabeller = async (processorCount = Infinity) => {
   });
 };
 
-module.exports.checkTags = async () => {
-  const bzdata = await rh.buzzsprout.read();
+module.exports.checkTags = async (customData) => {
+  const bzdata = customData || await rh.buzzsprout.read();
   var failProofLatch = false;
   const tagCounts = bzdata.reduce((counts, episode) => {
     const tag = episode.tags.trim(); // remove any leading or trailing whitespace
-    if (tag.length == 0) {
+    if (tag.length === 0) {
       failProofLatch = true;
-    } else if (counts[tag]) {
-      counts[tag]++;
     } else {
-      counts[tag] = 1;
+      if (!counts[tag]) {
+        // Initialize counts for new tag
+        counts[tag] = {
+          entries: 0,
+          time: 0,
+          plays: 0
+        };
+      }
+      counts[tag].entries++;
+      counts[tag].time += episode.duration;
+      counts[tag].plays += episode.total_plays;
     }
     return counts;
   }, {});
   return { tags: tagCounts, containsUnlabelledEpisodes: failProofLatch };
+};
+
+
+module.exports.statsAnalyser = async (customData) => {
+  const bzdata = customData || (await rh.buzzsprout.read());
+
+  // Extract unique artists from the data, skipping empty artist fields
+  const uniqueArtists = new Set(); // Create a new Set to store unique artist names
+  bzdata.forEach((item) => {
+    if (item.artist) {
+      // Check if the artist field is not empty
+      uniqueArtists.add(item.artist);
+    }
+  });
+
+  const artistsNames = Array.from(uniqueArtists); // Convert the Set back to an array of unique artists
+  const artists = await Promise.all(
+    artistsNames.map(async (artist) => {
+      return {
+        name: artist,
+        tags: await module.exports.checkTags(
+          bzdata.filter((episode) => episode.artist == artist)
+        )
+      };
+    })
+  );
+
+  return {
+    topics: await module.exports.checkTags(),
+    artists: artists // Convert the Set back to an array of unique artists
+  };
 };
 
 async function AI_Labeller(batch) {

@@ -1,8 +1,8 @@
 //imports
-const env = require(`dotenv`).config();
-const rightHand = require("./right-hand.js");
+require(`dotenv`).config();
 const rh = require(`./right-hand.js`);
 const TextCleaner = require(`text-cleaner`);
+const topics = require(`./topics.js`);
 
 //body
 var longStringOfInformation;
@@ -29,7 +29,7 @@ async function main() {
   fetchData().then(postfech);
 
   async function postfech() {
-    longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>Image of the day</h2><h3>${bingtitle}</h3><img src="${bingurl}" alt="${bingtitle}" /><br />${injection}<h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>Stats (Powered by ✨GPT-4✨)</h2><h4>Total entries ${BuzzsproutResponse.length} </h4> <p>`;
+    longStringOfInformation = `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body> <h1>Good Morning</h1><h2>Image of the day</h2><h3>${bingtitle}</h3><img src="${bingurl}" alt="${bingtitle}" /><br />${injection}<h2>Quote</h2> <br /> <strong><h3>${quote}<h3></strong> <br /> <h2>✨Stats</h2><h4>Total entries ${BuzzsproutResponse.length} </h4> <p>`;
     // sort data based on highest value
     BuzzsproutResponse.sort((a, b) => b.total_plays - a.total_plays);
     //filter data
@@ -72,7 +72,113 @@ async function main() {
     // Set the extraordinaryBit variable to the extraordinaryBit value from the CheckForArtist function
     extraordinaryBit = results.extraordinaryBit;
 
-    
+    // Process topics
+    const precheck = (await topics.checkTags()).containsUnlabelledEpisodes;
+    var topicsTableHTML =
+      "<h2>✨Topics</h2><table><tr><td><h3>Topic</h3></td><td><h3>Entries</h3></td><td><h3>Time</h3></td><td><h3>Plays</h3></td><td><h3>Most popular artist</h3></td><td><h3>Average</h3></td></tr>";
+    if (precheck) {
+      await topics.topicLabeller(5);
+    }
+    const stats = await topics.statsAnalyser();
+    const tags = Object.entries(stats.topics.tags).map(([key, value]) => ({
+      key: key,
+      value: value
+    }));
+    const artistss = stats.artists;
+
+    // Create a map to store most popular artist by plays for each topic
+    let mostPopularArtists = {};
+
+    // Iterate over artists to fill the mostPopularArtists map
+    artistss.forEach((artist) => {
+      let artistTags = artist.tags.tags;
+      for (let tag in artistTags) {
+        if (
+          !mostPopularArtists[tag] ||
+          artistTags[tag].plays > mostPopularArtists[tag].plays
+        ) {
+          mostPopularArtists[tag] = {
+            artist: artist.name,
+            plays: artistTags[tag].plays
+          };
+        }
+      }
+    });
+
+    // Use mostPopularArtists in table rows
+    tags.forEach((tag) => {
+      let popularArtist = mostPopularArtists[tag.key]
+        ? mostPopularArtists[tag.key].artist
+        : "N/A";
+      topicsTableHTML += `<tr><td style='padding:10px;'>${tag.key}</td><td>${
+        tag.value.entries
+      }</td><td style='padding:10px;'>${rh.getFormattedTime(
+        tag.value.time
+      )}</td><td>${
+        tag.value.plays
+      }</td><td style='padding:10px;'>${popularArtist}</td><td style='padding:10px;'>${Math.round(
+        tag.value.plays / tag.value.entries
+      )}</td></tr>`;
+    });
+    topicsTableHTML += "</table>";
+
+    let artistTableHTML = "<h2>✨Artists</h2><table>";
+    let artistInfo = {};
+
+    artistss.forEach((artist) => {
+      // Ensure that artist.tags and artist.tags.tags exist and are objects
+      if (artist.tags && typeof artist.tags.tags === "object") {
+        let totalPlays = 0;
+        let totalTime = 0;
+
+        // Iterate over each tag
+        Object.entries(artist.tags.tags).forEach(([key, tag]) => {
+          if (!artistInfo[artist.name]) {
+            artistInfo[artist.name] = {
+              tags: [],
+              entries: [],
+              time: [],
+              plays: []
+            };
+          }
+          artistInfo[artist.name].tags.push(key);
+          artistInfo[artist.name].entries.push(tag.entries);
+          artistInfo[artist.name].time.push(tag.time);
+          artistInfo[artist.name].plays.push(tag.plays);
+          totalPlays += tag.plays;
+          totalTime += tag.time;
+        });
+
+        artistInfo[artist.name].totalPlays = totalPlays;
+        artistInfo[artist.name].totalTime = totalTime;
+      }
+    });
+
+    Object.entries(artistInfo).forEach(([name, info]) => {
+      if (info.tags.length > 0) {
+        artistTableHTML += `<tr><td rowspan="${info.tags.length}" style='padding:10px;'>${name}</td>`;
+        info.tags.forEach((tag, index) => {
+          if (index > 0) {
+            artistTableHTML += "<tr>";
+          }
+          artistTableHTML += `<td style='padding:10px;'>${tag}</td><td>${
+            info.entries[index]
+          }</td><td>${rh.getFormattedTime(info.time[index])}</td><td>${
+            info.plays[index]
+          }</td></tr>`;
+        });
+        artistTableHTML += `<tr><td colspan="2" style='text-align:right;'>Total</td><td>${info.entries.reduce(
+          (a, b) => a + b,
+          0
+        )}</td><td>${rh.getFormattedTime(info.totalTime)}</td><td>${
+          info.totalPlays
+        }</td></tr>`;
+      }
+    });
+
+    artistTableHTML += "</table>";
+    topicsTableHTML += artistTableHTML;
+
     //general iterator (vague)
 
     // Initialize variables for calculating stats
@@ -180,7 +286,7 @@ async function main() {
     // Initialize HTML for extraordinary titles
     let ExtraOrdinaryHtml;
     if (extraordinaryBit) {
-      ExtraOrdinaryHtml = `<h1>Some Code-Breaking ExtraOrdinary Titles</h1>`;
+      ExtraOrdinaryHtml = `<h1>✨Some Code-Breaking ExtraOrdinary Titles</h1>`;
       extraordinarytitles.forEach((item, i) => {
         var id = i + 1;
         ExtraOrdinaryHtml = `${ExtraOrdinaryHtml} <h2>Title no ${id}, Title <a href="https://www.buzzsprout.com/1173590/episodes/${item.id}">${item.title}</a> </h2>`;
@@ -224,7 +330,7 @@ async function main() {
     )} </strong></h3>${Top3AndLatest5} ${rh.award(
       BuzzsproutResponse,
       artists
-    )}<br/><br/><p><strong>${stringifiedTitles}</strong></p></body></html>`;
+    )}<br/><br/>${topicsTableHTML}<br/><br/><p><strong>${stringifiedTitles}</strong></p></body></html>`;
 
     // Send email with longStringOfInformation
     rh.email(longStringOfInformation);

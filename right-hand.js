@@ -269,7 +269,7 @@ module.exports = {
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0,
-        seed: 37,
+        seed: 376942,
         response_format: { type: "json_object" }
       });
 
