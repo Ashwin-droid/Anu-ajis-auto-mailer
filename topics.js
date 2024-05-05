@@ -2,9 +2,62 @@ const rh = require(`./right-hand.js`);
 require(`dotenv`).config();
 const OpenAI = require(`openai`);
 
+// Interpreter (editor)
+module.exports.topicLabeller = async (processorCount = Infinity) => {
+  const batches = await dataPreparer();
+  console.log("Total number of batches: ", batches.length);
+  var loopCount = 0;
+  batches.forEach(async (batch, index) => {
+    if (loopCount == processorCount) return;
+    loopCount++;
+    console.log("Processing batch number: ", index + 1);
+    const labeledData = await AI_Labeller(batch);
+    const processor = labeledData.map((label) => {
+      return {
+        category: label.category,
+        targets: label.targets.map((id) => {
+          return {
+            title: batches[index].find((episode) => episode.id == id).title,
+            id: batches[index].find((episode) => episode.id == id).episodeId
+          };
+        })
+      };
+    });
+    processor.forEach(async (data) => {
+      data.targets.forEach(async (episode) => {
+        rh.buzzsprout.write(episode.id, {
+          tags: data.category
+        });
+      });
+    });
+  });
+};
+
+module.exports.checkTags = async () => {
+  const bzdata = await rh.buzzsprout.read();
+  const tagCounts = bzdata.reduce((counts, episode) => {
+    const tag = episode.tags.trim(); // remove any leading or trailing whitespace
+    if (counts[tag]) {
+      counts[tag]++;
+    } else {
+      counts[tag] = 1;
+    }
+    return counts;
+  }, {});
+  console.log(tagCounts);
+}
+
 async function AI_Labeller(batch) {
   const openai = new OpenAI.OpenAI({
     apiKey: process.env.OPENAI_API_KEY
+  });
+
+  const reqiredData = batch.map((episode) => {
+    return {
+      title: episode.title,
+      description: episode.description,
+      id: episode.id
+    };
   });
 
   const response = await openai.chat.completions.create({
@@ -17,7 +70,7 @@ async function AI_Labeller(batch) {
       },
       {
         role: "user",
-        content: JSON.stringify(batch)
+        content: JSON.stringify(reqiredData)
       }
     ],
     temperature: 0,
@@ -28,7 +81,7 @@ async function AI_Labeller(batch) {
     seed: 37,
     response_format: { type: "json_object" }
   });
-  return response.choices[0].message.content;
+  return JSON.parse(response.choices[0].message.content).data;
 }
 
 async function dataPreparer() {
