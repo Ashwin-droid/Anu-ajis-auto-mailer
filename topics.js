@@ -35,17 +35,20 @@ module.exports.topicLabeller = async (processorCount = Infinity) => {
 
 module.exports.checkTags = async () => {
   const bzdata = await rh.buzzsprout.read();
+  var failProofLatch = false;
   const tagCounts = bzdata.reduce((counts, episode) => {
     const tag = episode.tags.trim(); // remove any leading or trailing whitespace
-    if (counts[tag]) {
+    if (tag.length == 0) {
+      failProofLatch = true;
+    } else if (counts[tag]) {
       counts[tag]++;
     } else {
       counts[tag] = 1;
     }
     return counts;
   }, {});
-  console.log(tagCounts);
-}
+  return { tags: tagCounts, containsUnlabelledEpisodes: failProofLatch };
+};
 
 async function AI_Labeller(batch) {
   const openai = new OpenAI.OpenAI({
