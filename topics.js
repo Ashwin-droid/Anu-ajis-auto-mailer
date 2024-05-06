@@ -59,13 +59,13 @@ module.exports.checkTags = async (customData) => {
 };
 
 
-module.exports.statsAnalyser = async (customData) => {
-  const bzdata = customData || (await rh.buzzsprout.read());
+module.exports.statsAnalyser = async (extraOrdinaryTitlesAI) => {
+  const bzdata = (await rh.buzzsprout.read());
 
   // Extract unique artists from the data, skipping empty artist fields
   const uniqueArtists = new Set(); // Create a new Set to store unique artist names
   bzdata.forEach((item) => {
-    if (item.artist) {
+    if (item.artist && !extraOrdinaryTitlesAI.some((title) => title.id == item.id)) {
       // Check if the artist field is not empty
       uniqueArtists.add(item.artist);
     }

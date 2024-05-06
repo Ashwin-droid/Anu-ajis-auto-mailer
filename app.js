@@ -79,11 +79,14 @@ async function main() {
     if (precheck) {
       await topics.topicLabeller(5);
     }
-    const stats = await topics.statsAnalyser();
-    const tags = Object.entries(stats.topics.tags).map(([key, value]) => ({
-      key: key,
-      value: value
-    }));
+    const stats = await topics.statsAnalyser(extraordinarytitles);
+    const tags = Object.entries(stats.topics.tags)
+      .map(([key, value]) => ({
+        key: key,
+        value: value
+      }))
+      .sort((a, b) => b.value.plays - a.value.plays); // Sorting tags by number of plays in descending order
+
     const artistss = stats.artists;
 
     // Create a map to store most popular artist by plays for each topic
@@ -122,35 +125,43 @@ async function main() {
     });
     topicsTableHTML += "</table>";
 
-    let artistTableHTML = "<h2>✨Artists</h2><table>";
+    let artistTableHTML = "<h2>✨Artists</h2><table><tr><td><h3>Artist</h3></td><td><h3>Tag</h3></td><td><h3>Entries</h3></td><td><h3>Time</h3></td><td><h3>Plays</h3></td></tr>";
     let artistInfo = {};
+
+    artistss.sort((a, b) => {
+      // Sum total plays for artist b
+      const bTotalPlays = Object.values(b.tags.tags).reduce((total, tag) => total + tag.plays, 0);
+      // Sum total plays for artist a
+      const aTotalPlays = Object.values(a.tags.tags).reduce((total, tag) => total + tag.plays, 0);
+      return bTotalPlays - aTotalPlays; // Sorting in descending order
+    });    
 
     artistss.forEach((artist) => {
       // Ensure that artist.tags and artist.tags.tags exist and are objects
       if (artist.tags && typeof artist.tags.tags === "object") {
-        let totalPlays = 0;
-        let totalTime = 0;
+        let artistTags = Object.entries(artist.tags.tags).sort(
+          (a, b) => b[1].plays - a[1].plays
+        ); // Sorting each artist's tags by plays in descending order
 
         // Iterate over each tag
-        Object.entries(artist.tags.tags).forEach(([key, tag]) => {
+        artistTags.forEach(([key, tag]) => {
           if (!artistInfo[artist.name]) {
             artistInfo[artist.name] = {
               tags: [],
               entries: [],
               time: [],
-              plays: []
+              plays: [],
+              totalPlays: 0,
+              totalTime: 0
             };
           }
           artistInfo[artist.name].tags.push(key);
           artistInfo[artist.name].entries.push(tag.entries);
           artistInfo[artist.name].time.push(tag.time);
           artistInfo[artist.name].plays.push(tag.plays);
-          totalPlays += tag.plays;
-          totalTime += tag.time;
+          artistInfo[artist.name].totalPlays += tag.plays;
+          artistInfo[artist.name].totalTime += tag.time;
         });
-
-        artistInfo[artist.name].totalPlays = totalPlays;
-        artistInfo[artist.name].totalTime = totalTime;
       }
     });
 
@@ -172,7 +183,7 @@ async function main() {
           0
         )}</td><td>${rh.getFormattedTime(info.totalTime)}</td><td>${
           info.totalPlays
-        }</td></tr>`;
+        }</td></tr><hr/>`;
       }
     });
 
