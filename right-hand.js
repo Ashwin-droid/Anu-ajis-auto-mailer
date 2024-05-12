@@ -106,7 +106,7 @@ module.exports = {
      */
     write: (id, object) => {
       if (process.env.WRITE_ACC == 1) {
-        moduleInstanceOfAxios.put(
+        moduleInstanceOfAxios.patch(
           `/1173590/episodes/${id.toString()}.json`,
           object,
           {
@@ -115,7 +115,9 @@ module.exports = {
               "Content-Type": `application/json`
             }
           }
-        );
+        ).catch((error) => {
+          console.log(error);
+        });
       } else {
         console.log(`Sadly write access is denied`);
         console.log(
