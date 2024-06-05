@@ -106,18 +106,16 @@ module.exports = {
      */
     write: (id, object) => {
       if (process.env.WRITE_ACC == 1) {
-        moduleInstanceOfAxios.patch(
-          `/1173590/episodes/${id.toString()}.json`,
-          object,
-          {
+        moduleInstanceOfAxios
+          .patch(`/1173590/episodes/${id.toString()}.json`, object, {
             headers: {
               Authorization: `Token token=${process.env.API_KEY}`,
               "Content-Type": `application/json`
             }
-          }
-        ).catch((error) => {
-          console.log(error);
-        });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       } else {
         console.log(`Sadly write access is denied`);
         console.log(
@@ -167,17 +165,17 @@ module.exports = {
    * @param {array} unfixableTitles - Array of titles that cannot be fixed
    * @returns {object} - Object containing the results of the calculations
    */
-  CheckForArtist: async (array, unfixableTitles = [], firstRun = true) => {
-    let authors = [];
-    let extraordinaryTitles = [];
-    let extraordinaryBit = false;
-    let id = 0;
+  CheckForArtist: (array) => {
+    // Initialize variables to store the results of the calculations
+    var authors = [];
+    var extraordinaryTitles = [];
+    var extraordinaryBit = false;
 
-    array.forEach((item) => {
-      if (
-        !item.title.includes("(") ||
-        unfixableTitles.some((artist) => artist.id === item.id)
-      ) {
+    // Iterate through each item in the array
+    array.forEach((item, i) => {
+      // Check if the item's title does not contain parentheses
+      if (typeof item.title.split(`(`)[1] == `undefined`) {
+        // Add the item to the extraordinaryTitles array if it does not contain parentheses
         extraordinaryTitles.push({
           title: item.title,
           downloads: item.total_plays,
@@ -185,139 +183,114 @@ module.exports = {
         });
         extraordinaryBit = true;
       } else {
-        let titleParts = item.title.split("(");
-        let author1 = titleParts[1].split(")")[0].trim();
+        // Extract the author from the parentheses in the title
+        var author1 = TextCleaner(item.title.split(`(`)[1].split(`)`)[0])
+          .trim()
+          .valueOf();
 
-        let existingAuthor = authors.find(
-          (author) => author.author === author1
-        );
-
-        if (!existingAuthor) {
-          let inactive =
-            new Date() - new Date(item.published_at) >= InactivityTimer;
-
-          authors.push({
-            author: author1,
-            downloads: item.total_plays,
-            entries: 1,
-            duration: item.duration,
-            TPlayTime: item.duration * item.total_plays,
-            titles: [item],
-            sus: true,
-            mostRecentEpisode: { pubAT: item.published_at, id: item.id },
-            inactive,
-            id: id++
+        if (author1 == ``) {
+          // Add the item to the extraordinaryTitles array if the author is empty
+          extraordinaryTitles.push({
+            title: item.title,
+            downloads: item.total_plays
           });
+          extraordinaryBit = true;
         } else {
-          let index = authors.indexOf(existingAuthor);
-          existingAuthor.downloads += item.total_plays;
-          existingAuthor.entries++;
-          existingAuthor.duration += item.duration;
-          existingAuthor.TPlayTime += item.duration * item.total_plays;
-          existingAuthor.sus = false;
-          existingAuthor.titles.push(item);
+          // Check if the author already exists in the authors array
+          var existingAuthor = authors.find(({ author }) => author == author1);
 
-          if (
-            new Date(existingAuthor.mostRecentEpisode.pubAT) <
-            new Date(item.published_at)
-          ) {
-            existingAuthor.mostRecentEpisode.pubAT = item.published_at;
-            existingAuthor.mostRecentEpisode.id = item.id;
-          }
+          if (typeof existingAuthor == `undefined`) {
+            // Create a new author entry in the authors array if the author does not exist
+            var inactive = true;
+            if (
+              Math.abs(new Date() - new Date(item.published_at)) <
+              InactivityTimer
+            ) {
+              inactive = false;
+            }
 
-          if (
-            existingAuthor.inactive &&
-            new Date() - new Date(item.published_at) < InactivityTimer
-          ) {
-            existingAuthor.inactive = false;
+            authors.push({
+              author: author1,
+              downloads: item.total_plays,
+              entries: 1,
+              duration: item.duration,
+              TPlayTime: item.duration * item.total_plays,
+              titles: [item],
+              sus: true, // for detecting single episode players
+              mostRecentEpisode: { pubAT: item.published_at, id: item.id },
+              inactive
+            });
+          } else {
+            // Update the existing author's entry in the authors array
+            module.exports.FindAKeyInAnArrayOfObjects(
+              authors,
+              `author`,
+              author1,
+              (array, indexes) => {
+                indexes.forEach((Index) => {
+                  array[Index].downloads += item.total_plays;
+                  array[Index].entries++;
+                  array[Index].duration += item.duration;
+                  array[Index].TPlayTime += item.duration * item.total_plays;
+                  array[Index].sus = false; // not a single episode
+                  array[Index].titles.push(item);
+
+                  var d1 = new Date(authors[Index].mostRecentEpisode.pubAT);
+                  var d2 = new Date(item.published_at);
+
+                  if (d1 < d2) {
+                    array[Index].mostRecentEpisode.pubAT = item.published_at;
+                    array[Index].mostRecentEpisode.id = item.id;
+                  }
+
+                  if (authors[Index].inactive) {
+                    if (
+                      Math.abs(new Date() - new Date(item.published_at)) <
+                      InactivityTimer
+                    ) {
+                      array[Index].inactive = false;
+                    }
+                  }
+                });
+              }
+            );
           }
         }
       }
     });
-    let titlesFinalArray = authors
-      .filter((item) => !item.inactive)
-      .flatMap((item) => item.titles);
 
-    titlesFinalArray.sort(
-      (a, b) => new Date(b.published_at) - new Date(a.published_at)
-    );
+    var titlesFinalArray = [];
 
-    const openai = new OpenAI.OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-    try {
-      const diffusedArray = authors.map((author) => ({
-        id: author.id,
-        name: author.author,
-        entries: author.entries
-      }));
-
-      let messages = [
-        {
-          role: "system",
-          content:
-            'Given is a list of authors with duplicate names in the database. To be more effective, you are given the task of merging them together. Note that this response is hooked to live upstream API so the response format must be strictly maintained in JSON.\nOutput format (do not output anything apart from this and do not output this in a code bracket or include comments). Strictly output JSON only. If a generic name exists then delete it. Do not delete any author if it has more than 3 entries. When merging, the first name as well as the last name must strictly be the same (order (this means fname and lname are interchangeable) and language (this means you can merge English names into Marathi names or so on with any language) does not matter) Merge condition: trimIntermediaries(anyLanguage(fname)+anyLanguage(lname))=trimIntermediaries(anyLanguage(fname)+anyLanguage(lname)) or trimIntermediaries(anyLanguage(fname)+anyLanguage(lname))=trimIntermediaries(anyLanguage(lname)+anyLanguage(fname)). This does not mean you should delete any author with less than 3 entries. For merge, the rule is to merge similar names with lower entries (targets) with larger entries (source). This is done to save upstream API requests. If duplicates or stupid names do not exist, omit the entry outright.\n```\n{\n   "edits-required": true,\n   "merge": [{\n      "Source": <sourceID>, //If duplicate exists (integer)\n      "Targets": [<Array of target IDs>] //If duplicate exists (integer array)\n   },\n  ... //Other merges\n],\n"delete": [ <original ID>, // IDs to delete\n... //Other deletes\n]\n}\n```\n\nIf no deletes exist then return an empty array for the value and if no merges exist then too return an empty array for the value. Do not break the schema. If both do not exist then return the following.\n\n```\n{\n   "edits-required": false\n}\n```'
-        },
-        {
-          role: "user",
-          content: JSON.stringify(diffusedArray)
-        }
-      ];
-
-      const data = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: messages,
-        temperature: 0,
-        max_tokens: 1000,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-        seed: 376942,
-        response_format: { type: "json_object" }
-      });
-
-      let response = JSON.parse(data.choices[0].message.content);
-
-      if (response["edits-required"] && firstRun) {
-        response.merge.forEach((m) => {
-          let source = authors.find((a) => a.id === m.Source);
-          m.Targets.forEach((targetId) => {
-            let target = authors.find((a) => a.id === targetId);
-            target.titles.forEach((title) => {
-              module.exports.buzzsprout.write(title.id, {
-                title: `${title.title.split("(")[0]} (${source.author})`,
-                artist: source.author
-              });
-              // Simulating delay for API rate limit handling
-              setTimeout(() => {}, 500);
-            });
-          });
-          authors = authors.filter((a) => !m.Targets.includes(a.id));
-        });
-        var extraordinary = [];
-        if (response.delete.length > 0) {
-          extraordinary = response.delete
-            .map((delId) => {
-              return authors.filter((a) => a.id == delId);
-            })
-            .flat()
-            .map((e) => {
-              return e.titles;
-            }).flat();
-        }
-        const newData = await module.exports.buzzsprout.read();
-        return module.exports.CheckForArtist(newData, extraordinary, false);
+    // Filter out inactive authors and collect their titles
+    authors.forEach((item, i) => {
+      if (item.inactive) {
+        item.titles = [];
       } else {
-        return {
-          authors,
-          extraordinaryTitles,
-          extraordinaryBit,
-          titlesFinalArray
-        };
+        titlesFinalArray = titlesFinalArray.concat(item.titles);
       }
-    } catch (error) {
-      console.error("Error during OpenAI API call:", error);
-      throw error;
-    }
+    });
+
+    // Sort titles by published_at date in descending order
+    titlesFinalArray.sort((a, b) => {
+      var d1 = new Date(a.published_at);
+      var d2 = new Date(b.published_at);
+
+      if (d1 > d2) {
+        return -1;
+      } else if (d1 < d2) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+
+    // Return the results
+    return {
+      authors,
+      extraordinaryTitles,
+      extraordinaryBit,
+      titlesFinalArray
+    };
   },
   /**
    * Formats time duration in seconds to a human-readable format
